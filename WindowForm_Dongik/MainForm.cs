@@ -12,6 +12,7 @@ namespace WindowForm_Dongik
 {
     public partial class MainForm : Form
     {
+        
         public MainForm()
         {
             InitializeComponent();
@@ -19,16 +20,22 @@ namespace WindowForm_Dongik
 
         private void realTimeBtn_Click(object sender, EventArgs e)
         {
-           this.Visible = false;
-           RealTimeForm frm = new RealTimeForm(); 
-    	   frm.Owner = this; 
-    	   frm.Show(); 
+           //using(var dialog = new RealTimeForm())
+           //    dialog.ShowDialog(this);
+
+            new RealTimeForm().Show(this);
         }
 
         private void sensorBtn_Click(object sender, EventArgs e)
         {
+            using (var dialog = new SensorManageForm_ver2())
+                dialog.ShowDialog(this);
+        }
+
+        private void lastDataBtn_Click(object sender, EventArgs e)
+        {
             this.Visible = false;
-            SensorManageForm frm = new SensorManageForm();
+            LastTimeForm frm = new LastTimeForm();
             frm.Owner = this;
             frm.Show();
         }

@@ -31,7 +31,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.realTimeBtn = new System.Windows.Forms.Button();
             this.lastDataBtn = new System.Windows.Forms.Button();
-            this.vibrationBtn = new System.Windows.Forms.Button();
             this.sensorBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -40,7 +39,7 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Gulim", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label1.ForeColor = System.Drawing.Color.Black;
-            this.label1.Location = new System.Drawing.Point(427, 90);
+            this.label1.Location = new System.Drawing.Point(428, 137);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(310, 24);
             this.label1.TabIndex = 0;
@@ -49,7 +48,7 @@
             // realTimeBtn
             // 
             this.realTimeBtn.Font = new System.Drawing.Font("Gulim", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.realTimeBtn.Location = new System.Drawing.Point(431, 176);
+            this.realTimeBtn.Location = new System.Drawing.Point(432, 223);
             this.realTimeBtn.Name = "realTimeBtn";
             this.realTimeBtn.Size = new System.Drawing.Size(306, 50);
             this.realTimeBtn.TabIndex = 1;
@@ -60,27 +59,18 @@
             // lastDataBtn
             // 
             this.lastDataBtn.Font = new System.Drawing.Font("Gulim", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.lastDataBtn.Location = new System.Drawing.Point(431, 262);
+            this.lastDataBtn.Location = new System.Drawing.Point(432, 309);
             this.lastDataBtn.Name = "lastDataBtn";
             this.lastDataBtn.Size = new System.Drawing.Size(306, 50);
             this.lastDataBtn.TabIndex = 5;
-            this.lastDataBtn.Text = "지난 데이터 조회";
+            this.lastDataBtn.Text = "데이터 조회";
             this.lastDataBtn.UseVisualStyleBackColor = true;
-            // 
-            // vibrationBtn
-            // 
-            this.vibrationBtn.Font = new System.Drawing.Font("Gulim", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.vibrationBtn.Location = new System.Drawing.Point(431, 353);
-            this.vibrationBtn.Name = "vibrationBtn";
-            this.vibrationBtn.Size = new System.Drawing.Size(306, 50);
-            this.vibrationBtn.TabIndex = 6;
-            this.vibrationBtn.Text = "진동 센서 정보 조회";
-            this.vibrationBtn.UseVisualStyleBackColor = true;
+            this.lastDataBtn.Click += new System.EventHandler(this.lastDataBtn_Click);
             // 
             // sensorBtn
             // 
             this.sensorBtn.Font = new System.Drawing.Font("Gulim", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.sensorBtn.Location = new System.Drawing.Point(431, 445);
+            this.sensorBtn.Location = new System.Drawing.Point(432, 400);
             this.sensorBtn.Name = "sensorBtn";
             this.sensorBtn.Size = new System.Drawing.Size(306, 50);
             this.sensorBtn.TabIndex = 7;
@@ -94,7 +84,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1184, 662);
             this.Controls.Add(this.sensorBtn);
-            this.Controls.Add(this.vibrationBtn);
             this.Controls.Add(this.lastDataBtn);
             this.Controls.Add(this.realTimeBtn);
             this.Controls.Add(this.label1);
@@ -110,7 +99,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button realTimeBtn;
         private System.Windows.Forms.Button lastDataBtn;
-        private System.Windows.Forms.Button vibrationBtn;
         private System.Windows.Forms.Button sensorBtn;
     }
 }

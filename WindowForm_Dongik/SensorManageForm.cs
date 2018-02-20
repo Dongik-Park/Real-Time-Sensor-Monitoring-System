@@ -13,7 +13,7 @@ namespace WindowForm_Dongik
     public partial class SensorManageForm : Form
     {
 
-        private SensorDAO dao = new SensorDAO();
+        private SensorDAO dao = SensorDAO.Instance;
 
         public SensorManageForm()
         {
@@ -60,7 +60,7 @@ namespace WindowForm_Dongik
 
         private void SensorDataGridView()
         {
-            var list = from sensors in dao.LoadSensors()
+            var list = from sensors in dao.LoadConfigByJson()
                        orderby sensors.Value.AddDate.TimeOfDay
                        select sensors;
             int i = 0;
@@ -95,15 +95,19 @@ namespace WindowForm_Dongik
         // 추가 버튼 클릭
         private void AddBtn_Click(object sender, EventArgs e)
         {
-            int index = this.dataGridView2.CurrentCell.RowIndex;
-            string name = this.dataGridView2.Rows[index].Cells[1].FormattedValue.ToString();
-            this.dao.AddSensor(name);
-            this.dataGridView1.Rows.Add(new string[]{
-                (this.dataGridView1.Rows.Count + 1)+"" ,
-                name,
-                this.dao.Sensors[name].AddDate.ToString("yyyy.MM.dd:HH시")
-            });
-            MessageBox.Show(name+"이 추가되었습니다.");
+            //int index = this.dataGridView2.CurrentCell.RowIndex;
+            //string name = this.dataGridView2.Rows[index].Cells[1].FormattedValue.ToString();
+            //this.dao.AddSensor(name);
+            //this.dataGridView1.Rows.Add(new string[]{
+            //    (this.dataGridView1.Rows.Count + 1)+"" ,
+            //    name,
+            //    this.dao.Sensors[name].AddDate.ToString("yyyy.MM.dd:HH시")
+            //});
+            //MessageBox.Show(name+"이 추가되었습니다.");
+
+            SetConfigForm frm = new SetConfigForm();
+            frm.Owner = this;
+            frm.Show(); 
 
         }
         // 삭제 버튼 클릭
@@ -128,7 +132,7 @@ namespace WindowForm_Dongik
             DialogResult result = MessageBox.Show("센서 정보가 저장됩니다.", "YesOrNo",MessageBoxButtons.YesNoCancel);
             if (result == DialogResult.Yes)
             {
-                this.dao.SaveSensors();
+                //this.dao.SaveSensors();
             }
             else if (result == DialogResult.No)
             {

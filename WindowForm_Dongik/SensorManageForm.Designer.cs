@@ -28,17 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SensorManageForm));
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
-            this.AddBtn = new System.Windows.Forms.Button();
+            this.SetConfigBtn = new System.Windows.Forms.Button();
             this.DeleteBtn = new System.Windows.Forms.Button();
             this.SaveBtn = new System.Windows.Forms.Button();
+            this.printForm1 = new Microsoft.VisualBasic.PowerPacks.Printing.PrintForm(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             this.SuspendLayout();
             // 
             // dataGridView1
             // 
+            this.dataGridView1.BackgroundColor = System.Drawing.Color.WhiteSmoke;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Location = new System.Drawing.Point(42, 35);
             this.dataGridView1.Name = "dataGridView1";
@@ -49,6 +53,7 @@
             // 
             // dataGridView2
             // 
+            this.dataGridView2.BackgroundColor = System.Drawing.Color.WhiteSmoke;
             this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView2.Location = new System.Drawing.Point(540, 35);
             this.dataGridView2.Name = "dataGridView2";
@@ -57,16 +62,16 @@
             this.dataGridView2.TabIndex = 1;
             this.dataGridView2.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView2_CellContentClick);
             // 
-            // AddBtn
+            // SetConfigBtn
             // 
-            this.AddBtn.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.AddBtn.Location = new System.Drawing.Point(555, 292);
-            this.AddBtn.Name = "AddBtn";
-            this.AddBtn.Size = new System.Drawing.Size(76, 29);
-            this.AddBtn.TabIndex = 2;
-            this.AddBtn.Text = "추 가";
-            this.AddBtn.UseVisualStyleBackColor = true;
-            this.AddBtn.Click += new System.EventHandler(this.AddBtn_Click);
+            this.SetConfigBtn.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.SetConfigBtn.Location = new System.Drawing.Point(555, 292);
+            this.SetConfigBtn.Name = "SetConfigBtn";
+            this.SetConfigBtn.Size = new System.Drawing.Size(76, 29);
+            this.SetConfigBtn.TabIndex = 2;
+            this.SetConfigBtn.Text = "속 성";
+            this.SetConfigBtn.UseVisualStyleBackColor = true;
+            this.SetConfigBtn.Click += new System.EventHandler(this.AddBtn_Click);
             // 
             // DeleteBtn
             // 
@@ -90,6 +95,14 @@
             this.SaveBtn.UseVisualStyleBackColor = true;
             this.SaveBtn.Click += new System.EventHandler(this.SaveBtn_Click);
             // 
+            // printForm1
+            // 
+            this.printForm1.DocumentName = "document";
+            this.printForm1.Form = this;
+            this.printForm1.PrintAction = System.Drawing.Printing.PrintAction.PrintToPrinter;
+            this.printForm1.PrinterSettings = ((System.Drawing.Printing.PrinterSettings)(resources.GetObject("printForm1.PrinterSettings")));
+            this.printForm1.PrintFileName = null;
+            // 
             // SensorManageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -97,7 +110,7 @@
             this.ClientSize = new System.Drawing.Size(1048, 390);
             this.Controls.Add(this.SaveBtn);
             this.Controls.Add(this.DeleteBtn);
-            this.Controls.Add(this.AddBtn);
+            this.Controls.Add(this.SetConfigBtn);
             this.Controls.Add(this.dataGridView2);
             this.Controls.Add(this.dataGridView1);
             this.Name = "SensorManageForm";
@@ -113,9 +126,10 @@
 
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridView dataGridView2;
-        private System.Windows.Forms.Button AddBtn;
+        private System.Windows.Forms.Button SetConfigBtn;
         private System.Windows.Forms.Button DeleteBtn;
         private System.Windows.Forms.Button SaveBtn;
+        private Microsoft.VisualBasic.PowerPacks.Printing.PrintForm printForm1;
 
     }
 }
