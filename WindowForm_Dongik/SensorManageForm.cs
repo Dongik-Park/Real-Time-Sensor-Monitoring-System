@@ -12,132 +12,120 @@ namespace WindowForm_Dongik
 {
     public partial class SensorManageForm : Form
     {
-
-        private SensorDAO dao = SensorDAO.Instance;
-
+        private SensorDBManager dbManager = SensorDBManager.Instance;
+        //private Dictionary<string, SensorDTO> data = null;
         public SensorManageForm()
         {
             InitializeComponent();
         }
-
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private void SetupDataGridView()
         {
-            this.dataGridView1.ColumnCount = 3;
-            this.dataGridView2.ColumnCount = 3;
-
-            this.dataGridView1.Columns[0].Name = "No.";
-            this.dataGridView1.Columns[1].Name = "Name.";
-            this.dataGridView1.Columns[2].Name = "Date";
-            this.dataGridView2.Columns[0].Name = "No.";
-            this.dataGridView2.Columns[1].Name = "Name.";
-            this.dataGridView2.Columns[2].Name = "Date";
-            //this.dataGridView1.Columns[3].Name = "State";
-
-            DataGridViewButtonColumn dgvButton = new DataGridViewButtonColumn();
-            dgvButton.FlatStyle = FlatStyle.Flat;
-            dgvButton.HeaderText = "State";
-            dgvButton.Name = "StateBtn";
-            dgvButton.UseColumnTextForButtonValue = true;
-            dgvButton.Text = "활성화";
-
-            this.dataGridView1.Columns.Add(dgvButton);
-
+            sensorConfigBindingSource.SuspendBinding();
+            sensorConfigBindingSource.DataSource = dbManager.dc.SensorConfigs
+                                                            .Select(x => x)
+                                                            .ToList();
+            dataGridView1.DataSource = sensorConfigBindingSource;
+            dataGridView1.AllowUserToAddRows = false;
+            sensorConfigBindingSource.ResumeBinding();
+            dataGridView1.Refresh();
         }
-        private void TotSensorDataGridView()
+        // 속성 Button click
+        private void SetConfigBtn_Click(object sender, EventArgs e)
         {
-            var list = from sensors in dao.LoadTotalSensors()
-                       orderby sensors.Value.AddDate.TimeOfDay
-                       select sensors;
-            int i = 0;
-            foreach (KeyValuePair<string, SensorDTO> s in list)
-                this.dataGridView2.Rows.Add(new string[] { (++i).ToString(), s.Key, s.Value.AddDate.ToString("yyyy.MM.dd:HH시") });
-        }
+            if (dataGridView1.SelectedCells.Count < 1)
+                return;
+            int selectedrowindex = dataGridView1.SelectedCells[0].RowIndex;
+            DataGridViewRow selectedRow = dataGridView1.Rows[selectedrowindex];
+            string sensorName = selectedRow.Cells[1].Value.ToString();
 
-        private void SensorDataGridView()
-        {
-            var list = from sensors in dao.LoadConfigByJson()
-                       orderby sensors.Value.AddDate.TimeOfDay
-                       select sensors;
-            int i = 0;
-            foreach (KeyValuePair<string, SensorDTO> s in list)
+            int selectedCellCount = dataGridView1.SelectedCells.Count;
+            if (selectedCellCount < 2)
             {
-                if (s.Value.AddDate.ToString("yyyy.MM.dd:HH시").Length > 0)
-                  this.dataGridView1.Rows.Add(new string[] { (++i).ToString(), s.Key, s.Value.AddDate.ToString("yyyy.MM.dd:HH시") });
+                new SensorConfigEditForm(dbManager.dc.SensorConfigs
+                                                   .Where(t=>t.Name==sensorName)
+                                                   .First()).Show(this);
             }
+            else
+                MessageBox.Show("Select just one row.");
         }
-        private void SensorManageForm_Load(object sender, EventArgs e)
+        private void SensorManageForm_ver2_Load(object sender, EventArgs e)
         {
             SetupDataGridView();
-            //데이터 로딩
-            SensorDataGridView();
-            //전체 센서 목록 불러오기
-            TotSensorDataGridView();
+        }
+
+        private void CloseBtn_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void AddSensorBtn_Click(object sender, EventArgs e)
+        {
+            new SensorAddForm().Show(this);
+        }
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedCells.Count < 1)
+                return;
+
+            if (dataGridView1.SelectedCells.Count == 1)
+            {
+                //SensorConfig config = (SensorConfig)dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].DataBoundItem;
+                SensorConfig config = (SensorConfig)(dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].DataBoundItem);
+                //var key = dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value.ToString();
+                //SensorConfig config = dbManager.dc.SensorConfigs.Where(t => t.Name == key).First();
+                propertyGrid1.SelectedObject = config;
+                switch (config.SensorType)
+                {
+                    case "temperature": propertyGrid1.SelectedObject = config.TempertaureTables; break;
+                    case "cpu occupied": propertyGrid1.SelectedObject = config.CpuOccupiedTables; break;
+                    case "memory usage": propertyGrid1.SelectedObject = config.MemoryUsageTables; break;
+                    case "modbus": propertyGrid1.SelectedObject = config.ModbusTables; break;
+                }
+            }
+            else
+            {
+                var configs = new List<SensorConfig>();
+                for (int i = 0; i < dataGridView1.SelectedCells.Count; i++)
+                    configs.Add((SensorConfig)(dataGridView1.Rows[dataGridView1.SelectedCells[i].RowIndex].DataBoundItem));
+                //var key = dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value.ToString();
+                //SensorConfig config = dbManager.dc.SensorConfigs.Where(t => t.Name == key).First();
+                propertyGrid1.SelectedObjects = configs.ToArray();
+            }
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dataGridView1.Columns.Contains("button") && e.ColumnIndex == dataGridView1.Columns["button"].Index)//Specify which column contains Button in DGV
+            if (e.ColumnIndex == 0)
             {
-                MessageBox.Show("Row " + (e.RowIndex + 1) + " Of " + (e.ColumnIndex + 1) + " th Column button clicked ");
+                var key = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+                SensorConfig config = dbManager.dc.SensorConfigs.Where(t => t.Name == key).First();
+                object val = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                if ((byte)val == 1)
+                {
+                    dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = 0;
+                    config.IsActive = 0;
+                }
+                else
+                {
+                    dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = 1;
+                    config.IsActive = 1;
+                }
+                dbManager.dc.SubmitChanges();
+                //SetupDataGridView();
             }
         }
+        List<SensorConfigItem> items;
+    }
 
-        private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
+    public class SensorConfigItem
+    {
+        SensorConfig config;
+        public string Name { get { return config.Name; } set { config.Name = value; } }
+    }
 
-        }
-
-        // 추가 버튼 클릭
-        private void AddBtn_Click(object sender, EventArgs e)
-        {
-            //int index = this.dataGridView2.CurrentCell.RowIndex;
-            //string name = this.dataGridView2.Rows[index].Cells[1].FormattedValue.ToString();
-            //this.dao.AddSensor(name);
-            //this.dataGridView1.Rows.Add(new string[]{
-            //    (this.dataGridView1.Rows.Count + 1)+"" ,
-            //    name,
-            //    this.dao.Sensors[name].AddDate.ToString("yyyy.MM.dd:HH시")
-            //});
-            //MessageBox.Show(name+"이 추가되었습니다.");
-
-            SetConfigForm frm = new SetConfigForm();
-            frm.Owner = this;
-            frm.Show(); 
-
-        }
-        // 삭제 버튼 클릭
-        private void DeleteBtn_Click(object sender, EventArgs e)
-        {
-            int index = this.dataGridView1.CurrentCell.RowIndex;
-            string name = this.dataGridView1.Rows[index].Cells[1].FormattedValue.ToString();
-            DialogResult result = MessageBox.Show(name+"을 정말로 삭제하시겠습니까?", "YesOrNo", MessageBoxButtons.YesNoCancel);
-            if (result == DialogResult.Yes)
-            {
-                this.dao.Sensors.Remove(name);
-                this.dataGridView1.Rows.RemoveAt(index);
-            }
-            else if (result == DialogResult.No)
-            {
-                this.DialogResult = DialogResult.Abort;
-            }
-        }
-
-        private void SaveBtn_Click(object sender, EventArgs e)
-        {
-            DialogResult result = MessageBox.Show("센서 정보가 저장됩니다.", "YesOrNo",MessageBoxButtons.YesNoCancel);
-            if (result == DialogResult.Yes)
-            {
-                //this.dao.SaveSensors();
-            }
-            else if (result == DialogResult.No)
-            {
-                this.DialogResult = DialogResult.Abort;
-            }
-        }
+    public class TempSensorConfigItem : SensorConfigItem
+    {
+        TempertaureSensor myConfig;
     }
 }

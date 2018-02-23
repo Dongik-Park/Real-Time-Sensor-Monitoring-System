@@ -45,6 +45,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Management" />
     <Reference Include="System.Net.Json">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\CsJson\Bin\System.Net.Json.dll</HintPath>
@@ -61,39 +62,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseDAO.cs" />
-    <Compile Include="BaseDTO.cs" />
-    <Compile Include="ChildForm1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ChildForm1.Designer.cs">
-      <DependentUpon>ChildForm1.cs</DependentUpon>
-    </Compile>
     <Compile Include="LastTimeForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="LastTimeForm.Designer.cs">
       <DependentUpon>LastTimeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ParentForm.cs">
+    <Compile Include="RealTimeDataManager.cs" />
+    <Compile Include="SensorConfigEditForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ParentForm.Designer.cs">
-      <DependentUpon>ParentForm.cs</DependentUpon>
+    <Compile Include="SensorConfigEditForm.Designer.cs">
+      <DependentUpon>SensorConfigEditForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SensorConfigForm_ver3.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SensorConfigForm_ver3.Designer.cs">
-      <DependentUpon>SensorConfigForm_ver3.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CpuOccupied.cs" />
-    <Compile Include="EssentialInfo.cs" />
     <Compile Include="SensorAddForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SensorAddForm.Designer.cs">
       <DependentUpon>SensorAddForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SensorData.cs">
+      <DependentUpon>SensorData.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="SensorData.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SensorData.dbml</DependentUpon>
     </Compile>
     <Compile Include="SensorDataTables.cs">
       <SubType>UserControl</SubType>
@@ -101,35 +95,13 @@
     <Compile Include="SensorDataTables.Designer.cs">
       <DependentUpon>SensorDataTables.cs</DependentUpon>
     </Compile>
-    <Compile Include="SensorManageForm_ver2.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SensorManageForm_ver2.Designer.cs">
-      <DependentUpon>SensorManageForm_ver2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SetComfigForm_ver2.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SetComfigForm_ver2.Designer.cs">
-      <DependentUpon>SetComfigForm_ver2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SetConfigForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SetConfigForm.Designer.cs">
-      <DependentUpon>SetConfigForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MemoryUsage.cs" />
-    <Compile Include="Modbus.cs" />
-    <Compile Include="SensorDTO.cs" />
+    <Compile Include="SensorDBManager.cs" />
     <Compile Include="SensorManageForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SensorManageForm.Designer.cs">
       <DependentUpon>SensorManageForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SensorDAO.cs" />
-    <Compile Include="Temperature.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -144,35 +116,24 @@
     <Compile Include="RealTimeForm.Designer.cs">
       <DependentUpon>RealTimeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="TemperatureExecmanager.cs" />
-    <Compile Include="TemperatureLoadManager.cs" />
-    <Compile Include="TemperatureSaveManager.cs" />
-    <EmbeddedResource Include="ChildForm1.resx">
-      <DependentUpon>ChildForm1.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="LastTimeForm.resx">
       <DependentUpon>LastTimeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ParentForm.resx">
-      <DependentUpon>ParentForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SensorConfigForm_ver3.resx">
-      <DependentUpon>SensorConfigForm_ver3.cs</DependentUpon>
+    <EmbeddedResource Include="SensorConfigEditForm.resx">
+      <DependentUpon>SensorConfigEditForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SensorAddForm.resx">
       <DependentUpon>SensorAddForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="Properties\DataSources\SensorConfig1.datasource" />
+    <None Include="SensorData.dbml.layout">
+      <DependentUpon>SensorData.dbml</DependentUpon>
+    </None>
     <EmbeddedResource Include="SensorDataTables.resx">
       <DependentUpon>SensorDataTables.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SensorManageForm_ver2.resx">
-      <DependentUpon>SensorManageForm_ver2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SetComfigForm_ver2.resx">
-      <DependentUpon>SetComfigForm_ver2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SetConfigForm.resx">
-      <DependentUpon>SetConfigForm.cs</DependentUpon>
+    <EmbeddedResource Include="SensorManageForm.resx">
+      <DependentUpon>SensorManageForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -189,9 +150,6 @@
     <EmbeddedResource Include="RealTimeForm.resx">
       <DependentUpon>RealTimeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SensorManageForm.resx">
-      <DependentUpon>SensorManageForm.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\DataSources\SensorDTO.datasource" />
     <None Include="Properties\Settings.settings">
@@ -203,9 +161,17 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="SensorData.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>SensorData.designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

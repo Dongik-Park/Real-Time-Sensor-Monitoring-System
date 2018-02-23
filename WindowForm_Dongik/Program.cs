@@ -11,11 +11,11 @@ namespace WindowForm_Dongik
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        /// 
+        //Create Database Context
         [STAThread]
         static void Main()
         {
-            //new Modbus().Read();
-            //return;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

@@ -20,24 +20,18 @@ namespace WindowForm_Dongik
 
         private void realTimeBtn_Click(object sender, EventArgs e)
         {
-           //using(var dialog = new RealTimeForm())
-           //    dialog.ShowDialog(this);
-
             new RealTimeForm().Show(this);
         }
 
         private void sensorBtn_Click(object sender, EventArgs e)
         {
-            using (var dialog = new SensorManageForm_ver2())
+            using (var dialog = new SensorManageForm())
                 dialog.ShowDialog(this);
         }
 
         private void lastDataBtn_Click(object sender, EventArgs e)
         {
-            this.Visible = false;
-            LastTimeForm frm = new LastTimeForm();
-            frm.Owner = this;
-            frm.Show();
+            new LastTimeForm().Show(this);
         }
 
     }

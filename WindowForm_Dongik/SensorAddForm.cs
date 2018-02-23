@@ -12,7 +12,7 @@ namespace WindowForm_Dongik
 {
     public partial class SensorAddForm : Form
     {
-        private SensorDAO dao = SensorDAO.Instance;
+        private SensorDBManager dbManager = SensorDBManager.Instance;
         private GroupBox[] groups = new GroupBox[4];
         public SensorAddForm()
         {
@@ -68,127 +68,85 @@ namespace WindowForm_Dongik
             }
             switch (this.SensorComboBox.SelectedItem.ToString())
             {
-                case "temperature":  dao.AddSensorByJson(GetTemperatureConfig()); break;
-                case "cpu occupied": dao.AddSensorByJson(GetCpuOccupiedConfig()); break;
-                case "memory usage": dao.AddSensorByJson(GetMemoryUsageConfig()); break;
-                case "modbus":       dao.AddSensorByJson(GetModbusConfig());      break;
+                case "temperature":  InsertTemperatureSensor(); break;
+                case "cpu occupied": InsertCpuOccupiedSensor(); break;
+                case "memory usage": InsertMemoryUsageSensor(); break;
+                case "modbus":       InsertModbusSensor();      break;
                 default: MessageBox.Show("Input sensor type."); return;
             }
             MessageBox.Show(this.SensorNameText.Text.ToString()+" has been made");  
             this.SensorAddForm_Load(sender, e);
             this.Owner.Refresh();
         }
-        // Get temperature setting by JsonObjectCollection  
-        private JsonObjectCollection GetTemperatureConfig()
+        private SensorConfig InsertSensorConfig(bool isActive)
         {
-            JsonObjectCollection col = new JsonObjectCollection();
-            DateTime cur = DateTime.Now;
-            // Sensor ID
-            col.Add(new JsonStringValue("id", cur.ToString("yyyy.MM.dd:HH:mm:ss:") + this.SensorNameText.Text.ToString()));
-            // Sensor Type
-            col.Add(new JsonStringValue("type", this.SensorComboBox.SelectedItem.ToString()));
-            // Sensor name 
-            col.Add(new JsonStringValue("name", this.SensorNameText.Text.ToString()));
-            // Sensor generating time
-            col.Add(new JsonStringValue("date", cur.ToString("yyyy.MM.dd:HH:mm:ss")));
-            // Whether sensor is active
-            if (this.TempActiveCheck.Checked)
-                col.Add(new JsonStringValue("active", "1"));
-            else
-                col.Add(new JsonStringValue("active", "0"));
-            // Select cpu cores 
+            SensorConfig newConfig = new SensorConfig()
+            {
+                Name = this.SensorNameText.Text.ToString(),
+                MadeTime = DateTime.Now,
+                SensorType = this.SensorComboBox.SelectedItem.ToString(),
+                IsActive = 1
+            };
+            if (!isActive)
+                newConfig.IsActive = 0;
+            dbManager.dc.SensorConfigs.InsertOnSubmit(newConfig);
+            return newConfig;
+        }
+        private void InsertTemperatureSensor()
+        {
             if (this.CoreOneCheck.Checked)
-                col.Add(new JsonStringValue("core1", "1"));
-            else
-                col.Add(new JsonStringValue("core1", "0"));
+            {
+                SensorConfig newConfig = InsertSensorConfig(this.TempActiveCheck.Checked);
+                newConfig.TempertaureTables = new TempertaureSensor() { CoreIndex = 1 };
+                dbManager.dc.TempertaureSensors.InsertOnSubmit(newConfig.TempertaureTables);
+                dbManager.dc.SubmitChanges();
+            }
             if (this.CoreTwoCheck.Checked)
-                col.Add(new JsonStringValue("core2", "1"));                
-            else
-                col.Add(new JsonStringValue("core2", "0"));
+            {
+                SensorConfig newConfig = InsertSensorConfig(this.TempActiveCheck.Checked);
+                newConfig.TempertaureTables = new TempertaureSensor() { CoreIndex = 2 };
+                dbManager.dc.TempertaureSensors.InsertOnSubmit(newConfig.TempertaureTables);
+                dbManager.dc.SubmitChanges();
+            }
             if (this.CoreThreeCheck.Checked)
-                col.Add(new JsonStringValue("core3", "1"));
-            else
-                col.Add(new JsonStringValue("core3", "0"));
+            {
+                SensorConfig newConfig = InsertSensorConfig(this.TempActiveCheck.Checked);
+                newConfig.TempertaureTables = new TempertaureSensor() { CoreIndex = 3 };
+                dbManager.dc.TempertaureSensors.InsertOnSubmit(newConfig.TempertaureTables);
+                dbManager.dc.SubmitChanges();
+            }
             if (this.CoreFourCheck.Checked)
-                col.Add(new JsonStringValue("core4", "1"));
-            else
-                col.Add(new JsonStringValue("core4", "0"));
-            return col;
-        }
-        // Get cpu occupied setting by JsonObjectCollection  
-        private JsonObjectCollection GetCpuOccupiedConfig()
-        {
-            JsonObjectCollection col = new JsonObjectCollection();
-            DateTime cur = DateTime.Now;
-            // Sensor ID
-            col.Add(new JsonStringValue("id", cur.ToString("yyyy.MM.dd:HH:mm:ss:") + this.SensorNameText.Text.ToString()));
-            // Sensor Type
-            col.Add(new JsonStringValue("type", this.SensorComboBox.SelectedItem.ToString()));
-            // Sensor name 
-            col.Add(new JsonStringValue("name", this.SensorNameText.Text.ToString()));
-            // Sensor generating time
-            col.Add(new JsonStringValue("date", cur.ToString("yyyy.MM.dd:HH:mm:ss")));
-            // Whether sensor is active
-            if (this.CpuCheckBox.Checked)
-                col.Add(new JsonStringValue("active", "1"));
-            else
-                col.Add(new JsonStringValue("active", "0"));
-            // Select cpu process
-            if (this.CpuTotalCheck.Checked)
-                col.Add(new JsonStringValue("total", "1"));
-            else
-                col.Add(new JsonStringValue("total", "0"));
-            if (this.CpuCurrentCheck.Checked)
-                col.Add(new JsonStringValue("current", "1"));
-            else 
-                col.Add(new JsonStringValue("current", "0"));
-            return col;
-        }
-        // Get modbus setting by JsonObjectCollection  
-        private JsonObjectCollection GetModbusConfig()
-        {
-            JsonObjectCollection col = new JsonObjectCollection();
-            DateTime cur = DateTime.Now;
-            // Sensor ID
-            col.Add(new JsonStringValue("id", cur.ToString("yyyy.MM.dd:HH:mm:ss:") + this.SensorNameText.Text.ToString()));
-            // Sensor name 
-            col.Add(new JsonStringValue("name", this.SensorNameText.Text.ToString()));
-            // Sensor Type
-            col.Add(new JsonStringValue("type", this.SensorComboBox.SelectedItem.ToString()));
-            // Sensor generating time
-            col.Add(new JsonStringValue("date", cur.ToString("yyyy.MM.dd:HH:mm:ss")));
-            // Whether sensor is active
-            if (this.ModbusActiveCheck.Checked)
-                col.Add(new JsonStringValue("active", "1"));
-            else
-                col.Add(new JsonStringValue("active", "0"));
-            // Modbus informations
-            col.Add(new JsonStringValue("ip", this.IpTextBox.Text));
-            col.Add(new JsonStringValue("port", this.PortTextBox.Text));
-            col.Add(new JsonStringValue("address", this.AddressTextBox.Text));
-            col.Add(new JsonStringValue("size", this.SizeTextBox.Text));
-            return col;
-        }
-        // Get memory usage setting by JsonObjectCollection  
-        private JsonObjectCollection GetMemoryUsageConfig()
-        {
-            JsonObjectCollection col = new JsonObjectCollection();
-            DateTime cur = DateTime.Now;
-            // Sensor ID
-            col.Add(new JsonStringValue("id", cur.ToString("yyyy.MM.dd:HH:mm:ss:") + this.SensorNameText.Text.ToString()));
-            // Sensor name 
-            col.Add(new JsonStringValue("name", this.SensorNameText.Text.ToString()));
-            // Sensor Type
-            col.Add(new JsonStringValue("type", this.SensorComboBox.SelectedItem.ToString()));
-            // Sensor generating time
-            col.Add(new JsonStringValue("date", cur.ToString("yyyy.MM.dd:HH:mm:ss")));
-            if (this.MemoryActiveCheck.Checked)
-                col.Add(new JsonStringValue("active", "1"));
-            else
-                col.Add(new JsonStringValue("active", "0"));
+            {
+                SensorConfig newConfig = InsertSensorConfig(this.TempActiveCheck.Checked);
+                newConfig.TempertaureTables = new TempertaureSensor() { CoreIndex = 4 };
+                dbManager.dc.TempertaureSensors.InsertOnSubmit(newConfig.TempertaureTables);
+                dbManager.dc.SubmitChanges();
+            }
 
-            return col;
         }
-
+        private void InsertCpuOccupiedSensor()
+        {
+            SensorConfig newConfig = InsertSensorConfig(this.CpuCheckBox.Checked);
+            if (this.CpuTotalCheck.Checked)   newConfig.CpuOccupiedTables = new CpuOccupiedSensor() { ProcessType = 1 };
+            if (this.CpuCurrentCheck.Checked) newConfig.CpuOccupiedTables = new CpuOccupiedSensor() { ProcessType = 0 };
+            dbManager.dc.CpuOccupiedSensors.InsertOnSubmit(newConfig.CpuOccupiedTables);
+        }
+        private void InsertMemoryUsageSensor()
+        {
+            SensorConfig newConfig = InsertSensorConfig(this.MemoryActiveCheck.Checked);
+            newConfig.MemoryUsageTables = new MemoryUsageSensor() { };
+            dbManager.dc.MemoryUsageSensors.InsertOnSubmit(newConfig.MemoryUsageTables);
+        }
+        private void InsertModbusSensor()
+        {
+            SensorConfig newConfig = InsertSensorConfig(this.ModbusActiveCheck.Checked);
+            newConfig.ModbusTables = new ModbusSensor()
+            {
+                Ip = this.IpTextBox.Text,
+                Port = Convert.ToInt32(this.PortTextBox.Text),
+                Address = Convert.ToInt32(this.AddressTextBox.Text)
+            };
+            dbManager.dc.ModbusSensors.InsertOnSubmit(newConfig.ModbusTables);
+        }
     }
 }
