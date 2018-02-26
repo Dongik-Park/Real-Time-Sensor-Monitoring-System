@@ -16,8 +16,11 @@ namespace WindowForm_Dongik
         // Sensor Database manager
         private SensorDBManager sdm = SensorDBManager.Instance;
 
-        // RealTime DataGridview
+        // Real Time DataGridview
         private Dictionary<string, DataGridView> gridViewList = new Dictionary<string, DataGridView>();
+
+        // Real Time Tabpage
+        private Dictionary<string, TabPage> tabList = new Dictionary<string, TabPage>();
         
         // Save start time
         private DateTime strTime = DateTime.Now;
@@ -29,7 +32,8 @@ namespace WindowForm_Dongik
         private string[] checkeredList = null;
 
         // Real time data manage object
-        private RealTimeDataManager rtManager = new RealTimeDataManager();
+        //private RealTimeDataManager rtManager = new RealTimeDataManager();
+        private Dictionary<string, BaseSensorReader> rtManager = new Dictionary<string, BaseSensorReader>();
 
         public RealTimeForm()
         {
@@ -40,12 +44,61 @@ namespace WindowForm_Dongik
         private void RealTimeForm_Load(object sender, EventArgs e)
         {
             stopBtn.Enabled = false;
+            LoadRealTimeManager();
             LoadChart();
             LoadCheckedListBox();
             checkeredList = GetCheckedItems();
+            LoadTabPage(checkeredList);
+            LoadGridView(checkeredList);
             LoadSeriesByChecked(checkeredList);
             LoadDataTab(checkeredList);
             TimerOperating();
+        }
+        // Load sensor data manager
+        private void LoadRealTimeManager()
+        {
+            var sensorList = sdm.dc.SensorConfigs.Select(t => t);
+            foreach (var sensor in sensorList)
+            {
+                if (sensor.IsActive != 1)
+                    continue;
+                this.rtManager.Add(sensor.Id + "", SensorReaderFactory.GetManager(sensor));
+            }
+        }
+        // Make tabpages by checkered list
+        private void LoadTabPage(string[] list)
+        {
+            foreach (string sensor in list)
+            {
+                if (!tabList.ContainsKey(sensor))
+                {
+                    TabPage newPage = new TabPage(sensor);
+                    newPage.Name = sensor;
+                    tabList.Add(sensor, newPage);
+                }
+            }
+        }
+        // Load dataGridView
+        private void LoadGridView(string[] list)
+        {
+            foreach (string sensor in list)
+            {
+                if (!gridViewList.ContainsKey(sensor))
+                {
+                    DataGridView dataGridView = new DataGridView()
+                    {
+                        Name = sensor + "_GridView",
+                        Dock = DockStyle.Fill
+                    };
+                    dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                    dataGridView.ColumnCount = 3;
+                    dataGridView.Columns[0].Name = "Name";
+                    dataGridView.Columns[1].Name = "Time";
+                    dataGridView.Columns[2].Name = "Data";
+                    dataGridView.AllowUserToAddRows = false;
+                    gridViewList.Add(sensor, dataGridView);
+                }
+            }
         }
         // CheckedListBox load
         private void LoadCheckedListBox()
@@ -60,10 +113,16 @@ namespace WindowForm_Dongik
                 switch (sensor.SensorType)
                 {
                     case "temperature":  
-                        fullName = sensor.Name + "_Core" + sdm.dc.TempertaureSensors.Where(t => t.SensorConfigId == sensor.Id).First().CoreIndex; 
+                        fullName = sensor.Name + "_Core" + sdm.dc.TempertaureSensors
+                                                                 .Where(t => t.SensorConfigId == sensor.Id)
+                                                                 .First()
+                                                                 .CoreIndex; 
                         break;
                     case "cpu occupied":
-                        if (sdm.dc.CpuOccupiedSensors.Where(t => t.SensorConfigId == sensor.Id).First().ProcessType == 1)
+                        if (sdm.dc.CpuOccupiedSensors
+                                    .Where(t => t.SensorConfigId == sensor.Id)
+                                    .First().ProcessType 
+                                    == 1)
                             fullName = sensor.Name + "_Total";
                         else
                             fullName = sensor.Name + "_Current";
@@ -71,7 +130,10 @@ namespace WindowForm_Dongik
                     case "memory usage": fullName = sensor.Name; 
                         break;
                     case "modbus":      
-                        fullName = sensor.Name + "_" + sdm.dc.ModbusSensors.Where(t => t.SensorConfigId == sensor.Id).First().Address; 
+                        fullName = sensor.Name + "_" + sdm.dc.ModbusSensors
+                                                             .Where(t => t.SensorConfigId == sensor.Id)
+                                                             .First()
+                                                             .Address; 
                         break;
                 }
                 lst.Add(new SensorClass(fullName, true));
@@ -150,6 +212,7 @@ namespace WindowForm_Dongik
             {
                 if (sensor.IsActive != 1 && !list.Contains(sensor.Name))
                     continue;
+
                 switch (sensor.SensorType)
                 {
                     case "temperature":
@@ -191,26 +254,19 @@ namespace WindowForm_Dongik
         // Make tabs by chechered list
         private void LoadDataTab(string[] list)
         {
-            SensorDataTab.TabPages.Clear();
-            gridViewList.Clear();
+            //SensorDataTab.TabPages.Clear();
+            foreach (TabPage tabPage in SensorDataTab.TabPages)
+            {
+                if (!list.Contains(tabPage.Text))
+                    SensorDataTab.TabPages.Remove(tabPage);
+            }
             foreach (string sensor in list)
             {
-                DataGridView dataGridView = new DataGridView()
+                if (!SensorDataTab.TabPages.ContainsKey(sensor))
                 {
-                    Name = sensor + "_GridView",
-                    Dock = DockStyle.Fill
-                };
-                dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                dataGridView.ColumnCount = 3;
-                dataGridView.Columns[0].Name = "Name";
-                dataGridView.Columns[1].Name = "Time";
-                dataGridView.Columns[2].Name = "Data";
-                dataGridView.AllowUserToAddRows = false;
-                gridViewList.Add(sensor, dataGridView);
-
-                TabPage tabPage = new TabPage(sensor);
-                tabPage.Controls.Add(dataGridView);
-                SensorDataTab.TabPages.Add(tabPage);
+                    tabList[sensor].Controls.Add(gridViewList[sensor]);
+                    SensorDataTab.TabPages.Add(tabList[sensor]);
+                }
             }
         }
         // Get currently checked items list
@@ -231,7 +287,7 @@ namespace WindowForm_Dongik
             this.stopBtn.Enabled = true;
 
             foreach (string s in GetCheckedItems())
-                if (!checkeredList.Contains(s))
+                //if (!checkeredList.Contains(s))
                 {
                     LoadSeriesByChecked(GetCheckedItems());
                     LoadDataTab(GetCheckedItems());
@@ -263,10 +319,9 @@ namespace WindowForm_Dongik
             if (chart1.Series.IndexOf(sensorName) != -1)
             {
                 Series series = chart1.Series[sensorName];
-                SensorData curData = rtManager.GetSensorData(Convert.ToInt32(series.GetCustomProperty("id")));
+                SensorData curData = rtManager[series.GetCustomProperty("id")].GetSensorData();
                 AddDataToSeries(series, timeStamp, curData.Time, curData.Data);
                 UpdateDataGridView(sensorName, curData);
-                InsertSensorData(curData);
             }
         }
         // Add real time sensor data to series
@@ -333,10 +388,9 @@ namespace WindowForm_Dongik
             }
         }
         // Insert current sensor data to database
-        private void InsertSensorData(SensorData curData)
+        private void InsertSensorData(SensorDataContext db, SensorData curData)
         {
-            sdm.dc.SensorDatas.InsertOnSubmit(curData);
-            sdm.dc.SubmitChanges();
+            db.SensorDatas.InsertOnSubmit(curData);
         }
         //Timer operating code 
         private void TimerOperating()
@@ -357,16 +411,34 @@ namespace WindowForm_Dongik
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            // Update chart
-            chart1.Series.SuspendUpdates();
-            foreach (string sensor in checkeredList)
+            try
             {
-                if(chart1.Series.IndexOf(sensor) != -1)
-                 AddData((string)sensor);
+                // Update chart
+                chart1.Series.SuspendUpdates();
+                foreach (string sensor in checkeredList)
+                {
+                    if (chart1.Series.IndexOf(sensor) != -1)
+                        AddData((string)sensor);
+                }
+                chart1.ChartAreas[0].AxisX.Minimum = chart1.Series[0].Points[0].XValue;
+                chart1.ChartAreas[0].AxisX.Maximum = DateTime.FromOADate(chart1.Series[0].Points[0].XValue).AddSeconds(12).ToOADate();
+                chart1.Series.ResumeUpdates();
             }
-            chart1.ChartAreas[0].AxisX.Minimum = chart1.Series[0].Points[0].XValue;
-            chart1.ChartAreas[0].AxisX.Maximum = DateTime.FromOADate(chart1.Series[0].Points[0].XValue).AddSeconds(12).ToOADate();
-            chart1.Series.ResumeUpdates();
+            catch (Exception)
+            {
+                
+            }
+            // DB 배치처리
+            try
+            {
+                var db = sdm.dc;//new SensorDataContext();
+                //InsertSensorData(db);
+                db.SubmitChanges();
+            }
+            catch (Exception)
+            {
+                
+            }
         }
 
         private void MainBtn_Click(object sender, EventArgs e)

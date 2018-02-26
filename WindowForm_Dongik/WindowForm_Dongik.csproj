@@ -62,16 +62,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CpuOccupiedDataManager.cs" />
+    <Compile Include="CpuSensorReader.cs" />
     <Compile Include="LastTimeForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="LastTimeForm.Designer.cs">
       <DependentUpon>LastTimeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MemoryDataManager.cs" />
-    <Compile Include="ModbusDataManager.cs" />
-    <Compile Include="RealTimeDataManager.cs" />
+    <Compile Include="MemorySensorReader.cs" />
+    <Compile Include="ModbusSensorReader.cs" />
+    <Compile Include="BaseSensorReader.cs" />
+    <Compile Include="SensorReaderFactory.cs" />
     <Compile Include="SensorConfigEditForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -119,7 +120,7 @@
     <Compile Include="RealTimeForm.Designer.cs">
       <DependentUpon>RealTimeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="TemperatrueDataManager.cs" />
+    <Compile Include="TemperatrueSensorReader.cs" />
     <EmbeddedResource Include="LastTimeForm.resx">
       <DependentUpon>LastTimeForm.cs</DependentUpon>
     </EmbeddedResource>

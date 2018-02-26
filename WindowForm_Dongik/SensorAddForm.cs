@@ -144,7 +144,7 @@ namespace WindowForm_Dongik
             {
                 Ip = this.IpTextBox.Text,
                 Port = Convert.ToInt32(this.PortTextBox.Text),
-                Address = Convert.ToInt32(this.AddressTextBox.Text)
+                Address = Convert.ToUInt16(this.AddressTextBox.Text)
             };
             dbManager.dc.ModbusSensors.InsertOnSubmit(newConfig.ModbusTables);
         }
