@@ -20,13 +20,14 @@ namespace WindowForm_Dongik
         }
         private void SetupDataGridView()
         {
-            sensorConfigBindingSource.SuspendBinding();
-            sensorConfigBindingSource.DataSource = dbManager.dc.SensorConfigs
+            sensorConfigItemBindingSource.SuspendBinding();
+            sensorConfigItemBindingSource.DataSource = dbManager.dc.SensorConfigs
+                                                            //.Select(x => new SensorConfigItem(x.Id))
                                                             .Select(x => x)
                                                             .ToList();
-            dataGridView1.DataSource = sensorConfigBindingSource;
+            dataGridView1.DataSource = sensorConfigItemBindingSource;
             dataGridView1.AllowUserToAddRows = false;
-            sensorConfigBindingSource.ResumeBinding();
+            sensorConfigItemBindingSource.ResumeBinding();
             dataGridView1.Refresh();
         }
         // 속성 Button click
@@ -74,25 +75,36 @@ namespace WindowForm_Dongik
                 SensorConfig config = (SensorConfig)(dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].DataBoundItem);
                 //var key = dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value.ToString();
                 //SensorConfig config = dbManager.dc.SensorConfigs.Where(t => t.Name == key).First();
-                propertyGrid1.SelectedObject = config;
+                //propertyGrid1.SelectedObject = config;
                 switch (config.SensorType)
                 {
-                    case "temperature": propertyGrid1.SelectedObject = config.TempertaureTables; break;
-                    case "cpu occupied": propertyGrid1.SelectedObject = config.CpuOccupiedTables; break;
-                    case "memory usage": propertyGrid1.SelectedObject = config.MemoryUsageTables; break;
-                    case "modbus": propertyGrid1.SelectedObject = config.ModbusTables; break;
+                    case "temperature": propertyGrid1.SelectedObject  = new TempSensorConfigItem(config.Id); break;
+                    case "cpu occupied": propertyGrid1.SelectedObject = new CpuSensorConfigItem(config.Id); break;
+                    case "memory usage": propertyGrid1.SelectedObject = new MemSensorConfigItem(config.Id); break;
+                    case "modbus": propertyGrid1.SelectedObject = new ModbusConfigITem(config.Id); break;
                 }
             }
             else
             {
-                var configs = new List<SensorConfig>();
+                //var configs = new List<SensorConfigItem>();
                 for (int i = 0; i < dataGridView1.SelectedCells.Count; i++)
-                    configs.Add((SensorConfig)(dataGridView1.Rows[dataGridView1.SelectedCells[i].RowIndex].DataBoundItem));
+                {
+                    SensorConfig config = (SensorConfig)(dataGridView1.Rows[dataGridView1.SelectedCells[i].RowIndex].DataBoundItem);
+                    switch (config.SensorType)
+                    {
+                        case "temperature" : configs.Add(new TempSensorConfigItem(config.Id)); break;
+                        case "cpu occupied": configs.Add(new CpuSensorConfigItem(config.Id)); break;
+                        case "memory usage": configs.Add(new MemSensorConfigItem(config.Id)); break;
+                        case "modbus"      : configs.Add(new ModbusConfigITem(config.Id)); break;
+                    }
+                }
                 //var key = dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value.ToString();
                 //SensorConfig config = dbManager.dc.SensorConfigs.Where(t => t.Name == key).First();
-                propertyGrid1.SelectedObjects = configs.ToArray();
+                propertyGrid1.SelectedObjects = configs.ToArray() as object[];
+                
             }
         }
+        List<SensorConfigItem> configs = new List<SensorConfigItem>();
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -115,17 +127,64 @@ namespace WindowForm_Dongik
                 //SetupDataGridView();
             }
         }
-        List<SensorConfigItem> items;
     }
-
     public class SensorConfigItem
     {
-        SensorConfig config;
+        private SensorConfig config;
+        public SensorConfigItem(int sensorId)
+        {
+            this.config = SensorDBManager.Instance.dc.SensorConfigs
+                                                     .Where(t => t.Id == sensorId)
+                                                     .First();
+        }
         public string Name { get { return config.Name; } set { config.Name = value; } }
+        public DateTime Time { get { return config.MadeTime; } set { config.MadeTime = value; } }
+        public string SensorType { get { return config.SensorType; } set { config.SensorType = value; } }
     }
-
     public class TempSensorConfigItem : SensorConfigItem
     {
-        TempertaureSensor myConfig;
+        private TempertaureSensor tempSensor;
+        public TempSensorConfigItem(int sensorId) : base(sensorId)
+        {
+            this.tempSensor = SensorDBManager.Instance.dc.TempertaureSensors
+                                                     .Where(t => t.SensorConfigId == sensorId)
+                                                     .First();
+        }
+        public byte CoreIndex { get { return tempSensor.CoreIndex; } set { tempSensor.CoreIndex = value; } }
+    }
+    public class MemSensorConfigItem : SensorConfigItem
+    {
+        private MemoryUsageSensor memSensor;
+        public MemSensorConfigItem(int sensorId) : base(sensorId)
+        {
+            this.memSensor = SensorDBManager.Instance.dc.MemoryUsageSensors
+                                                        .Where(t => t.SensorConfigId == sensorId)
+                                                        .First();
+        }
+    }
+    public class CpuSensorConfigItem : SensorConfigItem
+    {
+        private CpuOccupiedSensor cpuSensor;
+        public CpuSensorConfigItem(int sensorId) : base(sensorId)
+        {
+            this.cpuSensor = SensorDBManager.Instance.dc.CpuOccupiedSensors
+                                                        .Where(t => t.SensorConfigId == sensorId)
+                                                        .First();
+        }
+        public byte Process { get { return cpuSensor.ProcessType; } set { cpuSensor.ProcessType = value; } }
+    }
+    public class ModbusConfigITem : SensorConfigItem
+    {
+        private ModbusSensor modSensor;
+        public ModbusConfigITem(int sensorId)
+            : base(sensorId)
+        {
+            this.modSensor = SensorDBManager.Instance.dc.ModbusSensors
+                                                        .Where(t => t.SensorConfigId == sensorId)
+                                                        .First();
+        }
+        public int Address { get { return modSensor.Address; } set { modSensor.Address = value; } }
+        public int Port { get { return modSensor.Port; } set { modSensor.Port = value; } }
+        public string Ip { get { return modSensor.Ip; } set { modSensor.Ip = value; } }
     }
 }

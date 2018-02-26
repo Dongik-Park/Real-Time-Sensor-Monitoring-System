@@ -31,18 +31,16 @@
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.isActiveDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.sensorTypeDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.madeTimeDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.sensorConfigBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.SetConfigBtn = new System.Windows.Forms.Button();
             this.CloseBtn = new System.Windows.Forms.Button();
             this.AddSensorBtn = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            this.sensorConfigItemBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sensorConfigBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sensorConfigItemBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // dataGridView1
@@ -51,12 +49,10 @@
             this.dataGridView1.BackgroundColor = System.Drawing.SystemColors.ButtonFace;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.isActiveDataGridViewTextBoxColumn,
             this.nameDataGridViewTextBoxColumn,
-            this.sensorTypeDataGridViewTextBoxColumn,
-            this.madeTimeDataGridViewTextBoxColumn});
+            this.sensorTypeDataGridViewTextBoxColumn});
             this.dataGridView1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.dataGridView1.DataSource = this.sensorConfigBindingSource;
+            this.dataGridView1.DataSource = this.sensorConfigItemBindingSource;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
@@ -73,17 +69,6 @@
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.SelectionChanged += new System.EventHandler(this.dataGridView1_SelectionChanged);
             // 
-            // isActiveDataGridViewTextBoxColumn
-            // 
-            this.isActiveDataGridViewTextBoxColumn.DataPropertyName = "IsActive";
-            this.isActiveDataGridViewTextBoxColumn.FalseValue = "0";
-            this.isActiveDataGridViewTextBoxColumn.HeaderText = "Active";
-            this.isActiveDataGridViewTextBoxColumn.Name = "isActiveDataGridViewTextBoxColumn";
-            this.isActiveDataGridViewTextBoxColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.isActiveDataGridViewTextBoxColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.isActiveDataGridViewTextBoxColumn.TrueValue = "1";
-            this.isActiveDataGridViewTextBoxColumn.Width = 50;
-            // 
             // nameDataGridViewTextBoxColumn
             // 
             this.nameDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
@@ -97,17 +82,6 @@
             this.sensorTypeDataGridViewTextBoxColumn.DataPropertyName = "SensorType";
             this.sensorTypeDataGridViewTextBoxColumn.HeaderText = "SensorType";
             this.sensorTypeDataGridViewTextBoxColumn.Name = "sensorTypeDataGridViewTextBoxColumn";
-            // 
-            // madeTimeDataGridViewTextBoxColumn
-            // 
-            this.madeTimeDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.madeTimeDataGridViewTextBoxColumn.DataPropertyName = "MadeTime";
-            this.madeTimeDataGridViewTextBoxColumn.HeaderText = "MadeTime";
-            this.madeTimeDataGridViewTextBoxColumn.Name = "madeTimeDataGridViewTextBoxColumn";
-            // 
-            // sensorConfigBindingSource
-            // 
-            this.sensorConfigBindingSource.DataSource = typeof(WindowForm_Dongik.SensorConfig);
             // 
             // SetConfigBtn
             // 
@@ -172,6 +146,10 @@
             this.propertyGrid1.Size = new System.Drawing.Size(361, 265);
             this.propertyGrid1.TabIndex = 7;
             // 
+            // sensorConfigItemBindingSource
+            // 
+            this.sensorConfigItemBindingSource.DataSource = typeof(WindowForm_Dongik.SensorConfigItem);
+            // 
             // SensorManageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -188,7 +166,7 @@
             this.Text = "SensorManageForm_ver2";
             this.Load += new System.EventHandler(this.SensorManageForm_ver2_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sensorConfigBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sensorConfigItemBindingSource)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -201,10 +179,8 @@
         private System.Windows.Forms.Button AddSensorBtn;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.PropertyGrid propertyGrid1;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn isActiveDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn sensorTypeDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn madeTimeDataGridViewTextBoxColumn;
-        private System.Windows.Forms.BindingSource sensorConfigBindingSource;
+        private System.Windows.Forms.BindingSource sensorConfigItemBindingSource;
     }
 }

@@ -62,12 +62,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CpuOccupiedDataManager.cs" />
     <Compile Include="LastTimeForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="LastTimeForm.Designer.cs">
       <DependentUpon>LastTimeForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MemoryDataManager.cs" />
+    <Compile Include="ModbusDataManager.cs" />
     <Compile Include="RealTimeDataManager.cs" />
     <Compile Include="SensorConfigEditForm.cs">
       <SubType>Form</SubType>
@@ -116,6 +119,7 @@
     <Compile Include="RealTimeForm.Designer.cs">
       <DependentUpon>RealTimeForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="TemperatrueDataManager.cs" />
     <EmbeddedResource Include="LastTimeForm.resx">
       <DependentUpon>LastTimeForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -126,6 +130,7 @@
       <DependentUpon>SensorAddForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\DataSources\SensorConfig1.datasource" />
+    <None Include="Properties\DataSources\SensorConfigItem.datasource" />
     <None Include="SensorData.dbml.layout">
       <DependentUpon>SensorData.dbml</DependentUpon>
     </None>
