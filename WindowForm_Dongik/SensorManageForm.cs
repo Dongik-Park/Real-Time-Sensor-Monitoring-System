@@ -26,10 +26,10 @@ namespace WindowForm_Dongik
             {
                 //list.Add(sensor);
                 switch(sensor.SensorType){
-                    case "temperature" : list.Add(new TempSensorConfigItem((TempertaureSensorConfig)sensor)); break;
-                    case "cpu occupied": list.Add(new CpuSensorConfigItem((CpuSensorConfig)sensor)); break;
-                    case "memory usage": list.Add(new MemSensorConfigItem((MemorySensorConfig)sensor)); break;
-                    case       "modbus": list.Add(new ModbusConfigItem((ModbusSensorConfig)sensor)); break;
+                    case SensorType.TEMPERATURE  : list.Add(new TempSensorConfigItem((TempertaureSensorConfig)sensor)); break;
+                    case SensorType.CPU_OCCUPIED : list.Add(new CpuSensorConfigItem((CpuSensorConfig)sensor));          break;
+                    case SensorType.MEMORY_USAGE : list.Add(new MemSensorConfigItem((MemorySensorConfig)sensor));       break;
+                    case       SensorType.MODBUS : list.Add(new ModbusConfigItem((ModbusSensorConfig)sensor));          break;
                 }
             }
             sensorConfigItemBindingSource.DataSource = list;
@@ -68,7 +68,14 @@ namespace WindowForm_Dongik
 
         private void AddSensorBtn_Click(object sender, EventArgs e)
         {
-            new SensorAddForm().Show(this);
+            DialogResult result = new SensorAddForm().ShowDialog(this);
+
+            if (result == DialogResult.Cancel)
+            {
+                dataGridView1.DataSource = null;
+                dataGridView1.DataSource = sensorConfigItemBindingSource;
+                dataGridView1.Refresh();
+            }
         }
 
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
@@ -130,8 +137,43 @@ namespace WindowForm_Dongik
             }
             
         }
+
+        private void deleteBtn_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedCells.Count != 1)
+            {
+                MessageBox.Show("1개의 행을 선택하세요.");
+                return;
+            }
+            int delIndex = dataGridView1.SelectedCells[0].RowIndex;
+            BaseSensorConfigItem delConfig = null;
+            try
+            {
+                delConfig = (BaseSensorConfigItem)(dataGridView1.Rows[delIndex].DataBoundItem);
+            }
+            catch (Exception)
+            {
+            }
+
+            DialogResult result = MessageBox.Show(delConfig.Name + "을 정말로 삭제하시겠습니까?","",MessageBoxButtons.YesNo);
+            try
+            {
+                if (result == DialogResult.Yes)
+                {
+                    var delDTO = dbManager.dc.BaseSensorConfigs
+                                    .Where(t => t.Id == delConfig.GetId())
+                                    .Select(t => t);
+                    foreach(var dto in delDTO)
+                        dbManager.dc.BaseSensorConfigs.DeleteOnSubmit(dto);
+                }
+            }
+            catch (Exception)
+            {
+            }
+            dbManager.dc.SubmitChanges();
+        }
     }
-    ////[TypeConverter(typeof(StreetAddressConverter))]
+
     public class BaseSensorConfigItem
     {
         private BaseSensorConfig config;
@@ -148,7 +190,7 @@ namespace WindowForm_Dongik
         [Category("Base")]
         public DateTime Time { get { return config.MadeTime; } set { config.MadeTime = value; } }
         [Category("Base")]
-        public string SensorType { get { return config.SensorType; } set { config.SensorType = value; } }
+        public SensorType SensorType { get { return config.SensorType; } set { config.SensorType = value; } }
     }
 
     public class TempSensorConfigItem : BaseSensorConfigItem
@@ -160,7 +202,7 @@ namespace WindowForm_Dongik
             this.tempSensor = tempSensor;
         }
         [Category("Extra")]
-        public byte CoreIndex { get { return tempSensor.CoreIndex; } set { tempSensor.CoreIndex = value; } }
+        public CoreNumber CoreIndex { get { return tempSensor.CoreIndex; } set { tempSensor.CoreIndex = value; } }
     }
 
     public class MemSensorConfigItem : BaseSensorConfigItem
@@ -182,7 +224,7 @@ namespace WindowForm_Dongik
             this.cpuSensor = cpuSensor;
         }
         [Category("Extra")]
-        public byte Process { get { return cpuSensor.ProcessType; } set { cpuSensor.ProcessType = value; } }
+        public ProcessType Process { get { return cpuSensor.ProcessType; } set { cpuSensor.ProcessType = value; } }
     }
     public class ModbusConfigItem : BaseSensorConfigItem
     {

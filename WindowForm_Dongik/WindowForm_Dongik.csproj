@@ -124,7 +124,6 @@
     <EmbeddedResource Include="SensorAddForm.resx">
       <DependentUpon>SensorAddForm.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\DataSources\SensorConfig1.datasource" />
     <None Include="Properties\DataSources\SensorConfigItem.datasource" />
     <None Include="SensorData.dbml.layout">

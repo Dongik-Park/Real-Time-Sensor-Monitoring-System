@@ -30,15 +30,16 @@ namespace WindowForm_Dongik
 
         private void SensorComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (this.SensorComboBox.SelectedItem.ToString())
+            SensorType sensorType = SensorType.NONE;
+            Enum.TryParse<SensorType>(SensorComboBox.SelectedValue.ToString(), out sensorType);
+            switch (sensorType)
             {
-                case "temperature":  GroupBoxControl(0); break;
-                case "cpu occupied": GroupBoxControl(1); break;
-                case "memory usage": GroupBoxControl(2); break;
-                case "modbus":       GroupBoxControl(3); break;
-                default:             GroupBoxControl(4); break;
+                case  SensorType.TEMPERATURE : GroupBoxControl(0); break;
+                case SensorType.CPU_OCCUPIED : GroupBoxControl(1); break;
+                case SensorType.MEMORY_USAGE : GroupBoxControl(2); break;
+                case       SensorType.MODBUS : GroupBoxControl(3); break;
+                default                      : GroupBoxControl(4); break;
             }
-            //this.Invalidate();
         }
 
         private void SensorAddForm_Load(object sender, EventArgs e)
@@ -47,8 +48,7 @@ namespace WindowForm_Dongik
             groups[1] = CpuGroupBox;
             groups[2] = MemoyUsageGroup;
             groups[3] = ModbusGroupBox;
-            this.SensorNameText.Text = "";
-            this.SensorComboBox.Text = this.SensorComboBox.Items[0].ToString();
+            this.SensorComboBox.DataSource = Enum.GetValues(typeof(SensorType));
             this.TemperatureGroup.Hide();
             this.CpuGroupBox.Hide();
             this.ModbusGroupBox.Hide();
@@ -64,19 +64,28 @@ namespace WindowForm_Dongik
         {
             if (SensorNameText.Text.Equals("") || SensorNameText.Text.Contains("/"))
             {
-                MessageBox.Show("Name should be changed");
+                MessageBox.Show("Name should be changed.");
                 return;
             }
+
             string name = SensorNameText.Text.ToString();
             DateTime time = DateTime.Now;
-            string sensorType = SensorComboBox.SelectedItem.ToString();
-            switch (this.SensorComboBox.SelectedItem.ToString())
+            SensorType sensorType = SensorType.NONE;
+            Enum.TryParse<SensorType>(SensorComboBox.SelectedValue.ToString(), out sensorType);
+
+            if (sensorType == SensorType.NONE)
             {
-                case  "temperature": InsertTemperatureSensor(name, time,sensorType,TempActiveCheck.Checked);     break;
-                case "cpu occupied": InsertCpuOccupiedSensor(name, time, sensorType, CpuCheckBox.Checked);       break;
-                case "memory usage": InsertMemoryUsageSensor(name, time, sensorType, MemoryActiveCheck.Checked); break;
-                case       "modbus": InsertModbusSensor(name, time, sensorType, ModbusActiveCheck.Checked);      break;
-                           default : MessageBox.Show("Input sensor type."); return;
+                MessageBox.Show("Choose the sensor type.");
+                return;
+            }
+                
+            switch (sensorType)
+            {
+                case  SensorType.TEMPERATURE : InsertTemperatureSensor(name, time, sensorType, TempActiveCheck.Checked);   break;
+                case SensorType.CPU_OCCUPIED : InsertCpuOccupiedSensor(name, time, sensorType, CpuCheckBox.Checked);       break;
+                case SensorType.MEMORY_USAGE : InsertMemoryUsageSensor(name, time, sensorType, MemoryActiveCheck.Checked); break;
+                case       SensorType.MODBUS : InsertModbusSensor(name, time, sensorType, ModbusActiveCheck.Checked);      break;
+                default                      : MessageBox.Show("Input sensor type."); return;
             }
             dbManager.dc.SubmitChanges();
             MessageBox.Show(this.SensorNameText.Text.ToString()+" has been made");  
@@ -84,27 +93,27 @@ namespace WindowForm_Dongik
             this.Owner.Refresh();
         }
 
-        private void InsertTemperatureSensor(string name, DateTime time, string sensorType, bool isActive)
+        private void InsertTemperatureSensor(string name, DateTime time, SensorType sensorType, bool isActive)
         {
             int coreSize = 5;
-            bool [] coreIndex = new bool[coreSize];
+            CoreNumber [] coreIndex = new CoreNumber[coreSize];
             for(int i = 0; i < coreSize; ++i)
-                coreIndex[i] = false;
+                coreIndex[i] = CoreNumber.NONE;
 
             if (this.CoreOneCheck.Checked){
-                coreIndex[1] = true;
+                coreIndex[1] = CoreNumber.CORE_1;
             }
             if (this.CoreTwoCheck.Checked){
-                coreIndex[2] = true;
+                coreIndex[2] = CoreNumber.CORE_2;
             }
             if (this.CoreThreeCheck.Checked) {
-                coreIndex[3] = true;
+                coreIndex[3] = CoreNumber.CORE_3;
             }
             if (this.CoreFourCheck.Checked){
-                coreIndex[4] = true;
+                coreIndex[4] = CoreNumber.CORE_4;
             }
             for(byte i = 1; i < coreSize; ++i){
-                if (coreIndex[i])
+                if (coreIndex[i] != CoreNumber.NONE)
                 {
                     TempertaureSensorConfig tempConfig = new TempertaureSensorConfig()
                     {
@@ -112,7 +121,7 @@ namespace WindowForm_Dongik
                         MadeTime = time,
                         SensorType = sensorType,
                         IsActive = isActive,
-                        CoreIndex = i
+                        CoreIndex = coreIndex[i]
                     };
                     System.Data.Linq.Table<BaseSensorConfig> table = dbManager.dc.BaseSensorConfigs;
                     table.InsertOnSubmit(tempConfig);
@@ -120,13 +129,13 @@ namespace WindowForm_Dongik
             }
 
         }
-        private void InsertCpuOccupiedSensor(string name, DateTime time, string sensorType, bool isActive)
+        private void InsertCpuOccupiedSensor(string name, DateTime time, SensorType sensorType, bool isActive)
         {
-            byte processType = 1;
-            //if (this.CpuTotalCheck.Checked)
-            //    processType = 1;
-            if (this.CpuCurrentCheck.Checked)
-                processType = 0;
+            ProcessType processType = ProcessType.NONE;
+            if (this.CpuTotalCheck.Checked)
+                processType = ProcessType.TOTAL;
+            else if (this.CpuCurrentCheck.Checked)
+                processType = ProcessType.CURRENT;
             CpuSensorConfig cpuConfig = new CpuSensorConfig()
             {
                 Name = name,
@@ -137,7 +146,7 @@ namespace WindowForm_Dongik
             };
             dbManager.dc.BaseSensorConfigs.InsertOnSubmit(cpuConfig);
         }
-        private void InsertMemoryUsageSensor(string name, DateTime time, string sensorType, bool isActive)
+        private void InsertMemoryUsageSensor(string name, DateTime time, SensorType sensorType, bool isActive)
         {
             MemorySensorConfig memConfig = new MemorySensorConfig()
             {
@@ -148,7 +157,7 @@ namespace WindowForm_Dongik
             };
             dbManager.dc.BaseSensorConfigs.InsertOnSubmit(memConfig);
         }
-        private void InsertModbusSensor(string name, DateTime time, string sensorType, bool isActive)
+        private void InsertModbusSensor(string name, DateTime time, SensorType sensorType, bool isActive)
         {
             ModbusSensorConfig modConfig = new ModbusSensorConfig()
             {
