@@ -78,7 +78,7 @@ namespace WindowForm_Dongik
                     continue;
                 //string[] tokens = reader.ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 //string fullName = reader.config.Name + "_" + tokens[tokens.Length - 1];
-                string fullName = reader.config.Name + "_" + reader.ToString();
+                string fullName = reader.Name + "_" + reader.ToString();
                 this.sensorReaders.Add(fullName, reader);
             }
         }
@@ -182,10 +182,9 @@ namespace WindowForm_Dongik
             }
         }
         // Make a series by name information
-        private Series MakeSeries(string sensorName, int id)
+        private Series MakeSeries(string sensorName)
         {
             Series series = new Series(sensorName);
-            series.SetCustomProperty("id", id + "");
             series.ChartType = SeriesChartType.Line;
             series.BorderWidth = 2;
             series.XValueType = ChartValueType.DateTime;
@@ -201,7 +200,7 @@ namespace WindowForm_Dongik
             {
                 if (sensorReaders.ContainsKey(sensor))
                 {
-                    Series newSeries = MakeSeries(sensor, sensorReaders[sensor].config.Id);
+                    Series newSeries = MakeSeries(sensor);
                     chart1.Series.Add(newSeries);
                 }
             }
@@ -232,14 +231,13 @@ namespace WindowForm_Dongik
             this.startBtn.Enabled = false;
             // and only Enable the Stop button
             this.stopBtn.Enabled = true;
-
-            foreach (string s in GetCheckedItems())
-                //if (!checkeredList.Contains(s))
-                {
-                    LoadSeriesByChecked(GetCheckedItems());
-                    LoadDataTab(GetCheckedItems());
-                }
+            // Reload checkered list
             checkeredList = GetCheckedItems();
+            // Reload Series
+            LoadSeriesByChecked(GetCheckedItems());
+            // Reload data tab
+            LoadDataTab(GetCheckedItems());
+            // Timer start
             timer1.Start();
         }
         // Stop btn click
@@ -329,9 +327,14 @@ namespace WindowForm_Dongik
                 {
                     if (chart1.Series.IndexOf(sensor) != -1)
                     {
-                        SensorData data = sensorReaders[sensor].GetSensorData();
-                        curData.Add(data);
-                        AddDataToChart(sensor, data);
+                        object data = sensorReaders[sensor].ReadSensorData();
+                        SensorData sensorData = new SensorData() { 
+                            Data = (double)data, 
+                            Time = DateTime.Now , 
+                            SensorConfigId = sensorReaders[sensor].Id
+                        };
+                        curData.Add(sensorData);
+                        AddDataToChart(sensor, sensorData);
                     }
                 }
                 chart1.ChartAreas[0].AxisX.Minimum = chart1.Series[0].Points[0].XValue;

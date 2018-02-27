@@ -28,7 +28,7 @@ namespace WindowForm_Dongik
 
         // Real time data manage object
         //private RealTimeDataManager sensorReaders = new RealTimeDataManager();
-        private Dictionary<string, BaseSensorReader> sensorReaders = new Dictionary<string, BaseSensorReader>();
+        private Dictionary<string, BaseSensorConfigItem> sensorReaders = new Dictionary<string, BaseSensorConfigItem>();
 
         double chartMaxTime = 0;
         double chartMinTime = 0;
@@ -66,13 +66,18 @@ namespace WindowForm_Dongik
             {
                 if (!sensor.IsActive)
                     continue;
-                BaseSensorReader reader = SensorReaderFactory.GetManager(sensor);
-                if (reader == null)
-                    continue;
+                BaseSensorConfigItem configItem = null;
+                switch (sensor.SensorType)
+                {
+                    case SensorType.TEMPERATURE : configItem = new TempSensorConfigItem((TempertaureSensorConfig)sensor); break;
+                    case SensorType.CPU_OCCUPIED: configItem = new CpuSensorConfigItem((CpuSensorConfig)sensor);          break;
+                    case SensorType.MEMORY_USAGE: configItem = new MemSensorConfigItem((MemorySensorConfig)sensor);       break;
+                    case SensorType.MODBUS      : configItem = new ModbusConfigItem((ModbusSensorConfig)sensor);          break;
+                }
                 //string[] tokens = reader.ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 //string fullName = reader.config.Name + "_" + tokens[tokens.Length - 1];
-                string fullName = reader.config.Name + "_" + reader.ToString();
-                this.sensorReaders.Add(fullName, reader);
+                string fullName = configItem.Name + "_" + configItem.ToString();
+                this.sensorReaders.Add(fullName, configItem);
             }
         }
         // Load checkedlist box
@@ -190,16 +195,15 @@ namespace WindowForm_Dongik
             {
                 if (sensorReaders.ContainsKey(sensor))
                 {
-                    Series newSeries = MakeSeries(sensor, sensorReaders[sensor].config.Id);
+                    Series newSeries = MakeSeries(sensor);
                     chart1.Series.Add(newSeries);
                 }
             }
         }
         // Make a series by name information
-        private Series MakeSeries(string sensorName, int id)
+        private Series MakeSeries(string sensorName)
         {
             Series series = new Series(sensorName);
-            series.SetCustomProperty("id", id + "");
             series.ChartType = SeriesChartType.Line;
             series.BorderWidth = 2;
             series.XValueType = ChartValueType.DateTime;
@@ -228,9 +232,9 @@ namespace WindowForm_Dongik
                 if (chart1.Series.IndexOf(sensor) != -1)
                 {
                     Series series = chart1.Series[sensor];
-                    BaseSensorConfig config = sensorReaders[sensor].config;
+                    int configId = sensorReaders[sensor].GetId();
                     var results = dbManager.dc.SensorDatas
-                                        .Where(t => t.SensorConfigId == config.Id
+                                        .Where(t => t.SensorConfigId == configId
                                             && t.Time >= startTimePicker.Value
                                             && t.Time <= lastTimePicker.Value)
                                         .Select(t => t)
