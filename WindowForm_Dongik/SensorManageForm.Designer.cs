@@ -75,7 +75,7 @@
             // 
             // sensorConfigItemBindingSource
             // 
-            this.sensorConfigItemBindingSource.DataSource = typeof(WindowForm_Dongik.SensorConfigItem);
+            this.sensorConfigItemBindingSource.DataSource = typeof(WindowForm_Dongik.BaseSensorConfig);
             // 
             // SetConfigBtn
             // 

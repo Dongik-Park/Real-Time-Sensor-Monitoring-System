@@ -336,7 +336,7 @@
             this.PortTextBox.Name = "PortTextBox";
             this.PortTextBox.Size = new System.Drawing.Size(133, 21);
             this.PortTextBox.TabIndex = 4;
-            this.PortTextBox.Text = "508";
+            this.PortTextBox.Text = "502";
             // 
             // label4
             // 

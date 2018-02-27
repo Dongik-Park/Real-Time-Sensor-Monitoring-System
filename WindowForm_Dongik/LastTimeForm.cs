@@ -13,17 +13,22 @@ namespace WindowForm_Dongik
 {
     public partial class LastTimeForm : Form
     {
-
         // Last Time DataGridview
         private Dictionary<string, DataGridView> gridViewList = new Dictionary<string, DataGridView>();
 
         // Last Time Tabpage
         private Dictionary<string, TabPage> tabList = new Dictionary<string, TabPage>();
-        
+
         // Sensor Database manager
-        private SensorDBManager sdm = SensorDBManager.Instance;
+        // 얘를 싱글톤으로 쓰지 않는 이유는 Linq2sql에서 DB connection을 유동적으로 관리하기 때문에 괜찮다.
+        // Linq2sql에서 singleton을 사용하지 말라고 권고한다.
+        private SensorDBManager dbManager = new SensorDBManager();
 
         private string[] checkeredList = null;
+
+        // Real time data manage object
+        //private RealTimeDataManager sensorReaders = new RealTimeDataManager();
+        private Dictionary<string, BaseSensorReader> sensorReaders = new Dictionary<string, BaseSensorReader>();
 
         double chartMaxTime = 0;
         double chartMinTime = 0;
@@ -32,46 +37,88 @@ namespace WindowForm_Dongik
         {
             InitializeComponent();
         }
-        public void BindingChartSeries(string[] sensors)
+
+        private void LastTimeForm_Load(object sender, EventArgs e)
         {
-            foreach (string sensor in sensors)
-            {
-                if (chart1.Series.IndexOf(sensor) != -1)
-                {
-                    Series series = chart1.Series[sensor];
-                    SensorConfig config = sdm.dc.SensorConfigs.Where(t => t.Id == Convert.ToInt32(series.GetCustomProperty("id"))).First();
-                    var results = sdm.dc.SensorDatas
-                                        .Where(t => t.SensorConfigId == config.Id 
-                                            && t.Time >= startTimePicker.Value 
-                                            && t.Time <= lastTimePicker.Value)
-                                        .Select(t => t) 
-                                        .ToArray(); // In this line, sql query will be transfered
-                    // Read Only chart - for loop is efficient
-                    // Read & Write chart - datasource bind is efficient
-                    foreach (var data in results)
-                    {
-                        series.Points.AddXY(data.Time, data.Data);
-                        UpdateDataGridView(sensor, data);
-                    }
-                    
-                }
-            }
-        }
-        // 사용자가 원하는 센서 정보 목록을 입력하고 조회 버튼 클릭하였을때
-        private void startBtn_Click(object sender, EventArgs e)
-        {
+            // Load Sensor data readers
+            LoadSensorDataReaders();
+            // Load ChartConfig
+            LoadChart();
+            // Load CheckedListBox
+            LoadCheckedListBox();
             // Get currently checked items
             checkeredList = GetCheckedItems();
-            // Load checked list
-            LoadSeriesByChecked(checkeredList);
             // Load Tabpages
-            //LoadTabPage(checkeredList);
+            LoadTabPage(checkeredList);
             // Load DataGridView
-            //LoadGridView(checkeredList);
-            // Update chart series
-            BindingChartSeries(checkeredList);
+            LoadGridView(checkeredList);
             // Update Data tab
             LoadDataTab(checkeredList);
+            // Load Checked series
+            LoadSeriesByChecked(checkeredList);
+        }
+
+        // Load sensor data manager
+        private void LoadSensorDataReaders()
+        {
+            var sensorList = dbManager.dc.BaseSensorConfigs.Select(t => t);
+            foreach (var sensor in sensorList)
+            {
+                if (!sensor.IsActive)
+                    continue;
+                BaseSensorReader reader = SensorReaderFactory.GetManager(sensor);
+                if (reader == null)
+                    continue;
+                //string[] tokens = reader.ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                //string fullName = reader.config.Name + "_" + tokens[tokens.Length - 1];
+                string fullName = reader.config.Name + "_" + reader.ToString();
+                this.sensorReaders.Add(fullName, reader);
+            }
+        }
+        // Load checkedlist box
+        private void LoadCheckedListBox()
+        {
+            List<SensorClass> lst = new List<SensorClass>();
+            // Get sensors from Database 
+            foreach (var sensor in sensorReaders)
+            {
+                lst.Add(new SensorClass(sensor.Key, true));
+            }
+            ((ListBox)this.checkedListBox1).DataSource = lst;
+            ((ListBox)this.checkedListBox1).DisplayMember = "Name";
+            ((ListBox)this.checkedListBox1).ValueMember = "IsChecked";
+
+
+            for (int i = 0; i < checkedListBox1.Items.Count; i++)
+            {
+                SensorClass obj = (SensorClass)checkedListBox1.Items[i];
+                checkedListBox1.SetItemChecked(i, obj.IsChecked);
+            }
+        }
+        // CheckedListBox item class
+        class SensorClass
+        {
+            public bool IsChecked { get; set; }
+            public string Name { get; set; }
+            public SensorClass()
+            {
+                IsChecked = true;
+                Name = "name";
+            }
+            public SensorClass(string Name, bool IsChecked)
+            {
+                this.Name = Name;
+                this.IsChecked = IsChecked;
+            }
+        }
+        // Get currently checked items list
+        private string[] GetCheckedItems()
+        {
+            string[] items = new string[checkedListBox1.CheckedItems.Count];
+
+            for (int i = 0; i <= checkedListBox1.CheckedItems.Count - 1; ++i)
+                items[i] = checkedListBox1.GetItemText(checkedListBox1.CheckedItems[i]);
+            return items;
         }
         // Load chart config
         private void LoadChart()
@@ -79,61 +126,6 @@ namespace WindowForm_Dongik
             chart1.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm:ss";
             chart1.ChartAreas[0].AxisX.LineColor = Color.Transparent;
             chart1.ChartAreas[0].AxisY.Maximum = 100;
-        }
-        // Make a series by name information
-        private Series MakeSeries(string sensorName, string extraName, int id)
-        {
-            string fullName = "";
-            if (extraName.Equals(""))
-                fullName = sensorName;
-            else
-                fullName = sensorName + "_" + extraName;
-            Series series = new Series(fullName);
-            series.SetCustomProperty("id", id + "");
-            series.SetCustomProperty("extra", extraName);
-            series.ChartType = SeriesChartType.Line;
-            series.BorderWidth = 2;
-            series.XValueType = ChartValueType.DateTime;
-            return series;
-        }
-        // Make serieses by checkered list
-        private void LoadSeriesByChecked(string[] list)
-        {
-            chart1.Series.Clear();
-            // Get sensors from Database 
-            var sensors = sdm.dc.SensorConfigs.Select(t => t);
-            foreach (var sensor in sensors)
-            {
-                if (sensor.IsActive != 1 && !list.Contains(sensor.Name))
-                     continue;
-                switch (sensor.SensorType)
-                {
-                    case "temperature":
-                        var tSensor = sdm.dc.TempertaureSensors.Where(t => t.SensorConfigId == sensor.Id).Select(t => t).First();
-                        chart1.Series.Add(MakeSeries(sensor.Name, "Core" + tSensor.CoreIndex, sensor.Id));
-                        break;
-                    case "cpu occupied":
-                        var cSensor = sdm.dc.CpuOccupiedSensors.Where(t => t.SensorConfigId == sensor.Id).Select(t => t).First();
-                        if (cSensor.ProcessType == 1)
-                            chart1.Series.Add(MakeSeries(sensor.Name, "Total", sensor.Id));
-                        else
-                            chart1.Series.Add(MakeSeries(sensor.Name, "Current", sensor.Id));
-                        break;
-                    case "memory usage":
-                        chart1.Series.Add(MakeSeries(sensor.Name, "", sensor.Id));
-                        break;
-                    case "modbus":
-                        int size = 0;
-                        var mSensor = sdm.dc.ModbusSensors.Where(t => t.SensorConfigId == sensor.Id).Select(t => t).First();
-                        chart1.Series.Add(MakeSeries(sensor.Name, mSensor.Address + "", sensor.Id));
-                        //while (size <= mSensor.Size)
-                        //{
-                        //    chart1.Series.Add(MakeSeries(sensor.Name, (mSensor.Address + size) + "", sensor.Id));
-                        //    ++size;
-                        //}
-                        break;
-                }
-            }
         }
         // Make tabpages by checkered list
         private void LoadTabPage(string[] list)
@@ -188,113 +180,79 @@ namespace WindowForm_Dongik
                 }
             }
         }
-        // Get currently checked items list
-        private string[] GetCheckedItems()
+        // Make serieses by checkered list
+        private void LoadSeriesByChecked(string[] list)
         {
-            string[] items = new string[checkedListBox1.CheckedItems.Count];
-
-            for (int i = 0; i <= checkedListBox1.CheckedItems.Count - 1; ++i)
-               items[i] = checkedListBox1.GetItemText(checkedListBox1.CheckedItems[i]);
-           return items;
-        }
-        // Load checkedlist box
-        private void LoadCheckedListBox()
-        {
-            List<SensorClass> lst = new List<SensorClass>();
-            var sensorList = sdm.dc.SensorConfigs
-                                    .Select(t => t)
-                                    .ToArray();
-            // Get sensors from Database 
-            foreach (var sensor in sensorList)
+            if (list == null)
+                return;
+            chart1.Series.Clear();
+            foreach (var sensor in list)
             {
-                if (sensor.IsActive != 1)
-                    continue;
-                string fullName = "";
-                switch (sensor.SensorType)
+                if (sensorReaders.ContainsKey(sensor))
                 {
-                    case "temperature":
-                        fullName = sensor.Name + "_Core" + sdm.dc.TempertaureSensors.Where(t => t.SensorConfigId == sensor.Id).First().CoreIndex;
-                        break;
-                    case "cpu occupied":
-                        if (sdm.dc.CpuOccupiedSensors.Where(t => t.SensorConfigId == sensor.Id).First().ProcessType == 1)
-                            fullName = sensor.Name + "_Total";
-                        else
-                            fullName = sensor.Name + "_Current";
-                        break;
-                    case "memory usage": fullName = sensor.Name;
-                        break;
-                    case "modbus":
-                        fullName = sensor.Name + "_" + sdm.dc.ModbusSensors.Where(t => t.SensorConfigId == sensor.Id).First().Address;
-                        break;
+                    Series newSeries = MakeSeries(sensor, sensorReaders[sensor].config.Id);
+                    chart1.Series.Add(newSeries);
                 }
-                lst.Add(new SensorClass(fullName, true));
-            }
-            ((ListBox)checkedListBox1).DataSource = lst;
-            ((ListBox)checkedListBox1).DisplayMember = "Name";
-            ((ListBox)checkedListBox1).ValueMember = "IsChecked";
-
-
-            for (int i = 0; i < checkedListBox1.Items.Count; i++)
-            {
-                SensorClass obj = (SensorClass)checkedListBox1.Items[i];
-                checkedListBox1.SetItemChecked(i, obj.IsChecked);
             }
         }
-        // CheckedListBox item class
-        class SensorClass
+        // Make a series by name information
+        private Series MakeSeries(string sensorName, int id)
         {
-            public bool IsChecked { get; set; }
-            public string Name { get; set; }
-            public SensorClass()
+            Series series = new Series(sensorName);
+            series.SetCustomProperty("id", id + "");
+            series.ChartType = SeriesChartType.Line;
+            series.BorderWidth = 2;
+            series.XValueType = ChartValueType.DateTime;
+            return series;
+        }
+        // 사용자가 원하는 센서 정보 목록을 입력하고 조회 버튼 클릭하였을때
+        private void startBtn_Click(object sender, EventArgs e)
+        {
+            // Get currently checked items
+            checkeredList = GetCheckedItems();
+            // Load checked list
+            LoadSeriesByChecked(checkeredList);
+            // Load Tabpages
+            //LoadTabPage(checkeredList);
+            // Load DataGridView
+            //LoadGridView(checkeredList);
+            // Update chart series
+            BindingChartSeries(checkeredList);
+            // Update Data tab
+            LoadDataTab(checkeredList);
+        }
+        public void BindingChartSeries(string[] sensors)
+        {
+            foreach (string sensor in sensors)
             {
-                IsChecked = true;
-                Name = "name";
-            }
-            public SensorClass(string Name, bool IsChecked)
-            {
-                this.Name = Name;
-                this.IsChecked = IsChecked;
+                if (chart1.Series.IndexOf(sensor) != -1)
+                {
+                    Series series = chart1.Series[sensor];
+                    BaseSensorConfig config = sensorReaders[sensor].config;
+                    var results = dbManager.dc.SensorDatas
+                                        .Where(t => t.SensorConfigId == config.Id
+                                            && t.Time >= startTimePicker.Value
+                                            && t.Time <= lastTimePicker.Value)
+                                        .Select(t => t)
+                                        .ToArray(); // In this line, sql query will be transfered
+                    // Read Only chart - for loop is efficient
+                    // Read & Write chart - datasource bind is efficient
+                    foreach (var data in results)
+                    {
+                        series.Points.AddXY(data.Time, data.Data);
+                        UpdateDataGridView(sensor, data);
+                    }
+
+                }
             }
         }
         // Update real time sensor data grid view
         private void UpdateDataGridView(string sensorName, SensorData data)
         {
-            // Should clear gridview before invocation!!!!!!!!!!!!!!!!!!!!!!!
             if (gridViewList.ContainsKey(sensorName))
             {
-                string extraName = "";
-                switch (sdm.dc.SensorConfigs.Where(t => t.Id == data.SensorConfigId).First().SensorType)
-                {
-                    case "temperature":
-                        var tSensor = sdm.dc.TempertaureSensors.Where(t => t.SensorConfigId == data.SensorConfigId).Select(t => t).First();
-                        extraName = "Core" + tSensor.CoreIndex;
-                        break;
-                    case "cpu occupied":
-                        var cSensor = sdm.dc.CpuOccupiedSensors.Where(t => t.SensorConfigId == data.SensorConfigId).Select(t => t).First();
-                        if (cSensor.ProcessType == 1)
-                            extraName = "Total process";
-                        else
-                            extraName = "Current process";
-                        break;
-                    case "memory usage":
-                        extraName = "Memory Usage";
-                        break;
-                    case "modbus":
-                        int size = 0;
-                        var mSensor = sdm.dc.ModbusSensors.Where(t => t.SensorConfigId == data.SensorConfigId).Select(t => t).First();
-                        extraName = "Address:" + mSensor.Address;
-                        //while (size <= mSensor.Size)
-                        //{
-                        //    chart1.Series.Add(MakeSeries(sensor.Name, (mSensor.Address + size) + "", sensor.Id));
-                        //    ++size;
-                        //}
-                        break;
-                }
-                //gridViewList[sensorName].Rows.Insert(0, new string[]{
-                //        extraName,
-                //        data.Time.ToString("MM월 dd일 HH:mm:ss"),
-                //        data.Data.ToString()
-                //    });
+                string[] tokens = sensorName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
+                string extraName = tokens[tokens.Length - 1];
                 Action updateAction = () =>
                 {
                     gridViewList[sensorName].Rows.Insert(0, new string[]{
@@ -312,29 +270,6 @@ namespace WindowForm_Dongik
             }
         }
 
-
-        private void LastTimeForm_Load(object sender, EventArgs e)
-        {
-            // Load CheckedListBox
-            LoadCheckedListBox();
-            // Get currently checked items
-            checkeredList = GetCheckedItems();
-            // Load ChartConfig
-            LoadChart();
-            // Load Tabpages
-            LoadTabPage(checkeredList);
-            // Load DataGridView
-            LoadGridView(checkeredList);
-            // Update Data tab
-            LoadDataTab(checkeredList);
-            // Load Checked series
-            LoadSeriesByChecked(checkeredList);
-        }
-
-        private void MainBtn_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
 
     }
 }

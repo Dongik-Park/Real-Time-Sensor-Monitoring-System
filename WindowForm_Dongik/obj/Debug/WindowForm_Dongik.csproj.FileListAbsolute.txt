@@ -7,7 +7,6 @@ C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\bin\Debug\NModbus.xml
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.LastTimeForm.resources
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.SensorAddForm.resources
-C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.SensorDataTables.resources
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.MainForm.resources
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.Properties.Resources.resources
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.RealTimeForm.resources
