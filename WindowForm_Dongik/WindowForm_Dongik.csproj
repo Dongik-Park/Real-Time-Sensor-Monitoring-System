@@ -33,15 +33,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DongIkLib">
-      <HintPath>..\DongIkLib\bin\Debug\DongIkLib.dll</HintPath>
-    </Reference>
     <Reference Include="FastMapper, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\FastMapper.1.2.0\lib\net40\FastMapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="NadaCommon">
+      <HintPath>.\NadaCommon.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
     <Reference Include="NModbus, Version=3.0.48.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NModbus.3.0.48\lib\net45\NModbus.dll</HintPath>
@@ -66,8 +66,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseSensorConfigItem.cs" />
-    <Compile Include="CpuSensorConfigItem.cs" />
     <Compile Include="CpuSensorReader.cs" />
     <Compile Include="LastTimeForm.cs">
       <SubType>Form</SubType>
@@ -76,10 +74,10 @@
       <DependentUpon>LastTimeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MemorySensorReader.cs" />
-    <Compile Include="MemSensorConfigItem.cs" />
-    <Compile Include="ModbusConfigItem.cs" />
     <Compile Include="ModbusSensorReader.cs" />
     <Compile Include="BaseSensorReader.cs" />
+    <Compile Include="OmapSensorReader.cs" />
+    <Compile Include="SensorDataVO.cs" />
     <Compile Include="SensorReaderFactory.cs" />
     <Compile Include="SensorConfigEditForm.cs">
       <SubType>Form</SubType>
@@ -123,7 +121,6 @@
       <DependentUpon>RealTimeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="TemperatrueSensorReader.cs" />
-    <Compile Include="TempSensorConfigItem.cs" />
     <EmbeddedResource Include="LastTimeForm.resx">
       <DependentUpon>LastTimeForm.cs</DependentUpon>
     </EmbeddedResource>

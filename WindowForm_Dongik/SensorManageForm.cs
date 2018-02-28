@@ -26,10 +26,11 @@ namespace WindowForm_Dongik
             {
                 //list.Add(sensor);
                 switch(sensor.SensorType){
-                    case SensorType.TEMPERATURE  : list.Add(new TempSensorConfigItem((TempertaureSensorConfig)sensor)); break;
-                    case SensorType.CPU_OCCUPIED : list.Add(new CpuSensorConfigItem((CpuSensorConfig)sensor));          break;
-                    case SensorType.MEMORY_USAGE : list.Add(new MemSensorConfigItem((MemorySensorConfig)sensor));       break;
-                    case       SensorType.MODBUS : list.Add(new ModbusConfigItem((ModbusSensorConfig)sensor));          break;
+                    case SensorType.Temperature  : list.Add(new TempSensorConfigItem((TempertaureSensorConfig)sensor)); break;
+                    case SensorType.Cpu_occupied : list.Add(new CpuSensorConfigItem((CpuSensorConfig)sensor));          break;
+                    case SensorType.Memory_usage : list.Add(new MemSensorConfigItem((MemorySensorConfig)sensor));       break;
+                    case       SensorType.Modbus : list.Add(new ModbusConfigItem((ModbusSensorConfig)sensor));          break;
+                    case         SensorType.Omap : list.Add(new OmapSensorConfigItem((OmapSensorConfig)sensor));        break;
                 }
             }
             sensorConfigItemBindingSource.DataSource = list;
@@ -106,13 +107,13 @@ namespace WindowForm_Dongik
                 return;
             if (e.ColumnIndex == 0)
             {
-                object val = 0;
+                bool val = true;
                 BaseSensorConfigItem config = null;
                 try
                 {
                     var key = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
                     config = (BaseSensorConfigItem)(dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].DataBoundItem);
-                    val = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                    val = (bool)dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
                 }
                 catch (Exception)
                 {
@@ -120,7 +121,7 @@ namespace WindowForm_Dongik
 
                 try
                 {
-                    if ((byte)val == 1)
+                    if (val)
                     {
                         dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = 0;
                         config.Active = false;
@@ -130,6 +131,7 @@ namespace WindowForm_Dongik
                         dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = 1;
                         config.Active = true;
                     }
+                    dbManager.dc.SubmitChanges();
                 }
                 catch (Exception)
                 {
@@ -172,5 +174,120 @@ namespace WindowForm_Dongik
             }
             dbManager.dc.SubmitChanges();
         }
+        private class BaseSensorConfigItem
+        {
+            private BaseSensorConfig config;
+            public BaseSensorConfigItem(BaseSensorConfig config)
+            {
+                this.config = config;
+            }
+
+            public int GetId() { return config.Id; }
+            [Category("Base")]
+            public bool Active { get { return Convert.ToBoolean(config.IsActive); } set { config.IsActive = value; } }
+            [Category("Base")]
+            public string Name { get { return config.Name; } set { config.Name = value; } }
+            [Category("Base")]
+            public DateTime Time { get { return config.MadeTime; } set { config.MadeTime = value; } }
+            [Category("Base")]
+            public SensorType SensorType { get { return config.SensorType; } set { config.SensorType = value; } }
+
+            // Override ToString
+            public override string ToString()
+            {
+                return Name + "," + Time + "," + SensorType + "," + Active;
+            }
+        }
+        private class CpuSensorConfigItem : BaseSensorConfigItem
+        {
+            private CpuSensorConfig cpuSensor;
+            public CpuSensorConfigItem(CpuSensorConfig cpuSensor)
+                : base(cpuSensor)
+            {
+                this.cpuSensor = cpuSensor;
+            }
+            [Category("Extra")]
+            public ProcessType ProcessType { get { return cpuSensor.ProcessType; } set { cpuSensor.ProcessType = value; } }
+            // Override ToString 
+            public override string ToString()
+            {
+                if (this.ProcessType == ProcessType.Total)
+                    //return base.ToString() + ", Total" 
+                    return "Total";
+                return "Current";
+            }
+        }
+        private class MemSensorConfigItem : BaseSensorConfigItem
+        {
+            private MemorySensorConfig memSensor;
+            public MemSensorConfigItem(MemorySensorConfig memSensor)
+                : base(memSensor)
+            {
+                this.memSensor = memSensor;
+            }
+            // Override ToString
+            public override string ToString()
+            {
+                //return base.ToString();
+                return "";
+            }
+        }
+        private class ModbusConfigItem : BaseSensorConfigItem
+        {
+            private ModbusSensorConfig modSensor;
+            public ModbusConfigItem(ModbusSensorConfig modSensor)
+                : base(modSensor)
+            {
+                this.modSensor = modSensor;
+            }
+            [Category("Extra")]
+            public ushort Address { get { return modSensor.Address; } set { modSensor.Address = value; } }
+            [Category("Extra")]
+            public int Port { get { return modSensor.Port; } set { modSensor.Port = value; } }
+            [Category("Extra")]
+            public string Ip { get { return modSensor.Ip; } set { modSensor.Ip = value; } }
+            // Override ToString 
+            public override string ToString()
+            {
+                //return base.ToString() + "," + modSensor.Address;
+                return "Address:" + Address;
+            }
+        }
+        private class TempSensorConfigItem : BaseSensorConfigItem
+        {
+            private TempertaureSensorConfig tempSensor;
+            public TempSensorConfigItem(TempertaureSensorConfig tempSensor)
+                : base(tempSensor)
+            {
+                this.tempSensor = tempSensor;
+            }
+            [Category("Extra")]
+            public CoreNumber CoreIndex { get { return tempSensor.CoreIndex; } set { tempSensor.CoreIndex = value; } }
+            // Override ToString
+            public override string ToString()
+            {
+                //return base.ToString() + ", Core" + temp.CoreIndex;
+                return CoreIndex.ToString();
+            }
+        }
+        private class OmapSensorConfigItem : BaseSensorConfigItem
+        {
+            private OmapSensorConfig omapSensor;
+            public OmapSensorConfigItem(OmapSensorConfig omapSensor)
+                : base(omapSensor)
+            {
+                this.omapSensor = omapSensor;
+            }
+            [Category("Extra")]
+            public OmapType OmapType { get { return omapSensor.OmapType; } set { omapSensor.OmapType = value; } }
+            // Override ToString
+            public override string ToString()
+            {
+                //return base.ToString() + ", Core" + temp.CoreIndex;
+                return OmapType.ToString();
+            }
+        }
+
+
     }
 }

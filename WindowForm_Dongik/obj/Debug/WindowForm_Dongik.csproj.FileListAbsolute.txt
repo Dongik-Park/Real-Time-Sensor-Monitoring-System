@@ -14,7 +14,7 @@ C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.csproj.GenerateResource.Cache
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.exe
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.pdb
-C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\bin\Debug\DongIkLib.dll
-C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\bin\Debug\DongIkLib.pdb
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.csprojResolveAssemblyReference.cache
 C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\obj\Debug\WindowForm_Dongik.SensorConfigEditForm.resources
+C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\bin\Debug\FastMapper.dll
+C:\Users\Nada\Documents\Visual Studio 2012\Projects\WindowForm_Dongik\WindowForm_Dongik\bin\Debug\NadaCommon.dll

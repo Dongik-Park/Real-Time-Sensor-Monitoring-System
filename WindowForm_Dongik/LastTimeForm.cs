@@ -20,24 +20,23 @@ namespace WindowForm_Dongik
         private Dictionary<string, TabPage> tabList = new Dictionary<string, TabPage>();
 
         // Sensor Database manager
-        // 얘를 싱글톤으로 쓰지 않는 이유는 Linq2sql에서 DB connection을 유동적으로 관리하기 때문에 괜찮다.
-        // Linq2sql에서 singleton을 사용하지 말라고 권고한다.
         private SensorDBManager dbManager = new SensorDBManager();
 
+        // Sensor configs
+        private BaseSensorConfig[] configs = null;
+
+        // Sensor names for UI ( series, checkedList )
+        private string[] sensorNames = null;
+
+        // User checked list
         private string[] checkeredList = null;
-
-        // Real time data manage object
-        //private RealTimeDataManager sensorReaders = new RealTimeDataManager();
-        private Dictionary<string, BaseSensorConfigItem> sensorReaders = new Dictionary<string, BaseSensorConfigItem>();
-
-        double chartMaxTime = 0;
-        double chartMinTime = 0;
 
         public LastTimeForm()
         {
             InitializeComponent();
         }
 
+        // Component load template
         private void LastTimeForm_Load(object sender, EventArgs e)
         {
             // Load Sensor data readers
@@ -62,32 +61,34 @@ namespace WindowForm_Dongik
         private void LoadSensorDataReaders()
         {
             var sensorList = dbManager.dc.BaseSensorConfigs.Select(t => t);
+            var tempConfigList = new List<BaseSensorConfig>();
+            var tempSensorNames = new List<string>();
             foreach (var sensor in sensorList)
             {
                 if (!sensor.IsActive)
                     continue;
-                BaseSensorConfigItem configItem = null;
-                switch (sensor.SensorType)
-                {
-                    case SensorType.TEMPERATURE : configItem = new TempSensorConfigItem((TempertaureSensorConfig)sensor); break;
-                    case SensorType.CPU_OCCUPIED: configItem = new CpuSensorConfigItem((CpuSensorConfig)sensor);          break;
-                    case SensorType.MEMORY_USAGE: configItem = new MemSensorConfigItem((MemorySensorConfig)sensor);       break;
-                    case SensorType.MODBUS      : configItem = new ModbusConfigItem((ModbusSensorConfig)sensor);          break;
+                tempConfigList.Add(sensor);
+                string sensorName = "";
+                switch(sensor.SensorType){
+                    case  SensorType.Temperature : sensorName = sensor.Name + "_" + ((TempertaureSensorConfig)sensor).CoreIndex; break;
+                    case SensorType.Cpu_occupied : sensorName = sensor.Name + "_" + ((CpuSensorConfig)sensor).ProcessType;       break;
+                    case SensorType.Memory_usage : sensorName = sensor.Name + "_" ;                                              break;
+                    case       SensorType.Modbus : sensorName = sensor.Name + "_" + ((ModbusSensorConfig)sensor).Address;        break;
+                    case         SensorType.Omap : sensorName = sensor.Name + "_" + ((OmapSensorConfig)sensor).OmapType;         break;
                 }
-                //string[] tokens = reader.ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                //string fullName = reader.config.Name + "_" + tokens[tokens.Length - 1];
-                string fullName = configItem.Name + "_" + configItem.ToString();
-                this.sensorReaders.Add(fullName, configItem);
+                tempSensorNames.Add(sensorName);
             }
+            configs = tempConfigList.ToArray();
+            sensorNames = tempSensorNames.ToArray();
         }
         // Load checkedlist box
         private void LoadCheckedListBox()
         {
             List<SensorClass> lst = new List<SensorClass>();
             // Get sensors from Database 
-            foreach (var sensor in sensorReaders)
+            foreach (var sensor in sensorNames)
             {
-                lst.Add(new SensorClass(sensor.Key, true));
+                lst.Add(new SensorClass(sensor, true));
             }
             ((ListBox)this.checkedListBox1).DataSource = lst;
             ((ListBox)this.checkedListBox1).DisplayMember = "Name";
@@ -193,7 +194,7 @@ namespace WindowForm_Dongik
             chart1.Series.Clear();
             foreach (var sensor in list)
             {
-                if (sensorReaders.ContainsKey(sensor))
+                if (sensorNames.Contains(sensor))
                 {
                     Series newSeries = MakeSeries(sensor);
                     chart1.Series.Add(newSeries);
@@ -209,30 +210,34 @@ namespace WindowForm_Dongik
             series.XValueType = ChartValueType.DateTime;
             return series;
         }
-        // 사용자가 원하는 센서 정보 목록을 입력하고 조회 버튼 클릭하였을때
-        private void startBtn_Click(object sender, EventArgs e)
+        // When user click search
+        private void searchBtn_Click(object sender, EventArgs e)
         {
             // Get currently checked items
             checkeredList = GetCheckedItems();
             // Load checked list
             LoadSeriesByChecked(checkeredList);
-            // Load Tabpages
-            //LoadTabPage(checkeredList);
-            // Load DataGridView
-            //LoadGridView(checkeredList);
-            // Update chart series
-            BindingChartSeries(checkeredList);
             // Update Data tab
             LoadDataTab(checkeredList);
+            // Update chart series
+            SearchSensorData(checkeredList);
         }
-        public void BindingChartSeries(string[] sensors)
+        // Load sensor data
+        private void SearchSensorData(string[] sensors)
         {
             foreach (string sensor in sensors)
             {
                 if (chart1.Series.IndexOf(sensor) != -1)
                 {
                     Series series = chart1.Series[sensor];
-                    int configId = sensorReaders[sensor].GetId();
+                    int index = -1;
+                    for (int i = 0; i < sensorNames.Length; ++i)
+                        if (sensorNames[i].Equals(sensor))
+                        {
+                            index = i;
+                            break;
+                        }
+                    int configId = configs[index].Id;
                     var results = dbManager.dc.SensorDatas
                                         .Where(t => t.SensorConfigId == configId
                                             && t.Time >= startTimePicker.Value
@@ -255,8 +260,14 @@ namespace WindowForm_Dongik
         {
             if (gridViewList.ContainsKey(sensorName))
             {
-                string[] tokens = sensorName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
-                string extraName = tokens[tokens.Length - 1];
+                int index = -1;
+                for (int i = 0; i < sensorNames.Length; ++i)
+                    if (sensorNames[i].Equals(sensorName))
+                    {
+                        index = i;
+                        break;
+                    }
+                string extraName = sensorNames[index].ToString();
                 Action updateAction = () =>
                 {
                     gridViewList[sensorName].Rows.Insert(0, new string[]{
@@ -266,8 +277,8 @@ namespace WindowForm_Dongik
                     });
                     if (gridViewList[sensorName].Rows.Count > 30)
                     {
-                        int index = gridViewList[sensorName].Rows.Count - 1;
-                        gridViewList[sensorName].Rows.Remove(gridViewList[sensorName].Rows[index]);
+                        int gridIndex = gridViewList[sensorName].Rows.Count - 1;
+                        gridViewList[sensorName].Rows.Remove(gridViewList[sensorName].Rows[gridIndex]);
                     }
                 };
                 gridViewList[sensorName].BeginInvoke(updateAction);

@@ -14,8 +14,6 @@ namespace WindowForm_Dongik
     public partial class RealTimeForm : Form
     {
         // Sensor Database manager
-        // 얘를 싱글톤으로 쓰지 않는 이유는 Linq2sql에서 DB connection을 유동적으로 관리하기 때문에 괜찮다.
-        // Linq2sql에서 singleton을 사용하지 말라고 권고한다.
         private SensorDBManager dbManager = new SensorDBManager();
 
         // Real Time DataGridview
@@ -30,19 +28,24 @@ namespace WindowForm_Dongik
         // Save finish time
         private DateTime fnsTime = DateTime.Now;
 
+        // Real time data readers
+        private BaseSensorReader[] dataReaders = null;
+
+        // Sensor configs
+        private BaseSensorConfig[] configs = null;
+
+        // Sensor names for UI ( series, checkedList )
+        private string[] sensorNames = null;
+
         // User checked list
         private string[] checkeredList = null;
-
-        // Real time data manage object
-        //private RealTimeDataManager sensorReaders = new RealTimeDataManager();
-        private Dictionary<string, BaseSensorReader> sensorReaders = new Dictionary<string, BaseSensorReader>();
 
         public RealTimeForm()
         {
             InitializeComponent();
         }
 
-        // component 구성
+        // Component load template
         private void RealTimeForm_Load(object sender, EventArgs e)
         {
             stopBtn.Enabled = false;
@@ -69,18 +72,23 @@ namespace WindowForm_Dongik
         private void LoadSensorDataReaders()
         {
             var sensorList = dbManager.dc.BaseSensorConfigs.Select(t => t);
+            var tempDataReaders = new List<BaseSensorReader>();
+            var tempConfigList = new List<BaseSensorConfig>();
+            var tempSensorNames = new List<string>();
             foreach (var sensor in sensorList)
             {
                 if (!sensor.IsActive)
                     continue;
-                BaseSensorReader reader = SensorReaderFactory.GetManager(sensor);
+                BaseSensorReader reader = SensorReaderFactory.CreateReader(sensor);
                 if (reader == null)
                     continue;
-                //string[] tokens = reader.ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                //string fullName = reader.config.Name + "_" + tokens[tokens.Length - 1];
-                string fullName = reader.Name + "_" + reader.ToString();
-                this.sensorReaders.Add(fullName, reader);
+                tempDataReaders.Add(reader);
+                tempConfigList.Add(sensor);
+                tempSensorNames.Add(sensor.Name + "_" + reader.ToString());
             }
+            dataReaders = tempDataReaders.ToArray();
+            configs     = tempConfigList.ToArray();
+            sensorNames = tempSensorNames.ToArray();
         }
         // Load chart config
         private void LoadChart()
@@ -107,9 +115,9 @@ namespace WindowForm_Dongik
         {
             List<SensorClass> lst = new List<SensorClass>();
             // Get sensors from Database 
-            foreach (var sensor in sensorReaders)
+            foreach (var sensor in sensorNames)
             {
-                lst.Add(new SensorClass(sensor.Key, true));
+                lst.Add(new SensorClass(sensor, true));
             }
             ((ListBox)this.checkedListBox1).DataSource = lst;
             ((ListBox)this.checkedListBox1).DisplayMember = "Name";
@@ -198,7 +206,7 @@ namespace WindowForm_Dongik
             chart1.Series.Clear();
             foreach (var sensor in list)
             {
-                if (sensorReaders.ContainsKey(sensor))
+                if (sensorNames.Contains(sensor))
                 {
                     Series newSeries = MakeSeries(sensor);
                     chart1.Series.Add(newSeries);
@@ -251,14 +259,14 @@ namespace WindowForm_Dongik
             timer1.Stop();
         }
         // Add real time data to chart
-        public void AddDataToChart(string sensorName, SensorData curData)
+        public void AddDataToChart(string sensorName, SensorDataVO curData)
         {
             lock(this.chart1){
                 DateTime timeStamp  = DateTime.Now;
                 if (chart1.Series.IndexOf(sensorName) != -1)
                 {
                     Series series = chart1.Series[sensorName];
-                    AddDataToSeries(series, timeStamp, curData.Time, curData.Data);
+                    AddDataToSeries(series, timeStamp, curData.CurTime, curData.Data);
                     UpdateDataGridView(sensorName, curData);
                 }
             }
@@ -272,34 +280,40 @@ namespace WindowForm_Dongik
             double removeBefore = removeTime.AddSeconds((double)(10) * (-1)).ToOADate();
 
             //remove oldest values to maintain a constant number of data points
-            while (series.Points[0].XValue < removeBefore)
+            while (series.Points.Count > 0 && series.Points[0].XValue < removeBefore)
             {
                 series.Points.RemoveAt(0);
             }
         }
         // Update real time sensor data grid view
-        private void UpdateDataGridView(string sensorName, SensorData data)
+        private void UpdateDataGridView(string sensorName, SensorDataVO data)
         {
             if (gridViewList.ContainsKey(sensorName))
             {
-                string[] tokens = sensorName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
-                string extraName = tokens[tokens.Length - 1];
+                int index = -1;
+                for (int i = 0; i < sensorNames.Length; ++i)
+                    if (sensorNames[i].Equals(sensorName)){
+                        index = i;
+                        break;
+                    }
+                string extraName = dataReaders[index].ToString();
+
                 Action updateAction = () => {
                     gridViewList[sensorName].Rows.Insert(0, new string[]{
                         extraName,
-                        data.Time.ToString("MM월 dd일 HH:mm:ss"),
+                        data.CurTime.ToString("MM월 dd일 HH:mm:ss"),
                         data.Data.ToString()
                     });
                     if (gridViewList[sensorName].Rows.Count > 30)
                     {
-                        int index = gridViewList[sensorName].Rows.Count - 1;
-                        gridViewList[sensorName].Rows.Remove(gridViewList[sensorName].Rows[index]);
+                        int gridIndex = gridViewList[sensorName].Rows.Count - 1;
+                        gridViewList[sensorName].Rows.Remove(gridViewList[sensorName].Rows[gridIndex]);
                     }
                 };
                 gridViewList[sensorName].BeginInvoke(updateAction);
             }
         }
-        //Timer operating code 
+        // Timer operating code 
         private void TimerOperating()
         {
             System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
@@ -308,6 +322,7 @@ namespace WindowForm_Dongik
             timer.Tick += new System.EventHandler(time_ticker);
             timer.Start();
         }
+        // Update current time
         void time_ticker(object sender, System.EventArgs e)
         {
             // Express time
@@ -315,38 +330,50 @@ namespace WindowForm_Dongik
             if (this.label2.Text.Equals("00:00:00"))
                 this.label1.Text = System.DateTime.Now.ToString("yyyy년 MM월 dd일");
         }
-
+        // Read current sensor data
         private void timer1_Tick(object sender, EventArgs e)
         {
             var curData = new List<SensorData>();
+            // Update chart
             try
             {
-                // Update chart
                 chart1.Series.SuspendUpdates();
                 foreach (string sensor in checkeredList)
                 {
                     if (chart1.Series.IndexOf(sensor) != -1)
                     {
-                        object data = sensorReaders[sensor].ReadSensorData();
-                        SensorData sensorData = new SensorData() { 
-                            Data = (double)data, 
-                            Time = DateTime.Now , 
-                            SensorConfigId = sensorReaders[sensor].Id
+                        int index = -1;
+                        for (int i = 0; i < sensorNames.Length; ++i)
+                            if (sensorNames[i].Equals(sensor)){
+                                index = i;
+                                break;
+                            }
+                        SensorDataVO readData = dataReaders[index].ReadSensorData();
+                        if (readData.Type == SensorType.None)
+                            continue;
+                        SensorData addData = new SensorData()
+                        {
+                            Data = readData.Data,
+                            Time = readData.CurTime,
+                            SensorConfigId = configs[index].Id
                         };
-                        curData.Add(sensorData);
-                        AddDataToChart(sensor, sensorData);
+                        curData.Add(addData);
+                        AddDataToChart(sensor, readData);
                     }
                 }
-                chart1.ChartAreas[0].AxisX.Minimum = chart1.Series[0].Points[0].XValue;
-                chart1.ChartAreas[0].AxisX.Maximum = DateTime.FromOADate(chart1.Series[0].Points[0].XValue).AddSeconds(12).ToOADate();
+                if (chart1.Series[0] != null && chart1.Series[0].Points.Count > 0)
+                {
+                    chart1.ChartAreas[0].AxisX.Minimum = chart1.Series[0].Points[0].XValue;
+                    chart1.ChartAreas[0].AxisX.Maximum = DateTime.FromOADate(chart1.Series[0].Points[0].XValue).AddSeconds(12).ToOADate();
+                }
                 chart1.Series.ResumeUpdates();
             }
             catch (Exception)
             {
-                
+                return;
             }
 
-            // DB 배치처리
+            // DB transaction
             try
             {
                 dbManager.dc.SensorDatas.InsertAllOnSubmit(curData);
@@ -357,15 +384,11 @@ namespace WindowForm_Dongik
                 
             }
         }
-
-        private void MainBtn_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
+        // When form closed
         private void RealTimeForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            stopBtn_Click(null, null);
+            this.stopBtn_Click(sender, e);
+            //this.Close();
         }
     }
 }

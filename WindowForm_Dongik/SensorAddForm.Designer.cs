@@ -57,11 +57,18 @@
             this.ModbusActiveCheck = new System.Windows.Forms.CheckBox();
             this.MemoyUsageGroup = new System.Windows.Forms.GroupBox();
             this.MemoryActiveCheck = new System.Windows.Forms.CheckBox();
+            this.OmapGroupBox = new System.Windows.Forms.GroupBox();
+            this.OmapTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.OmapIpText = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.OmapActiveCheck = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.TemperatureGroup.SuspendLayout();
             this.CpuGroupBox.SuspendLayout();
             this.ModbusGroupBox.SuspendLayout();
             this.MemoyUsageGroup.SuspendLayout();
+            this.OmapGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // SensorComboBox
@@ -402,11 +409,77 @@
             this.MemoryActiveCheck.Text = " Active";
             this.MemoryActiveCheck.UseVisualStyleBackColor = true;
             // 
+            // OmapGroupBox
+            // 
+            this.OmapGroupBox.Controls.Add(this.OmapTypeComboBox);
+            this.OmapGroupBox.Controls.Add(this.label7);
+            this.OmapGroupBox.Controls.Add(this.OmapIpText);
+            this.OmapGroupBox.Controls.Add(this.label9);
+            this.OmapGroupBox.Controls.Add(this.OmapActiveCheck);
+            this.OmapGroupBox.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.OmapGroupBox.Location = new System.Drawing.Point(23, 130);
+            this.OmapGroupBox.Margin = new System.Windows.Forms.Padding(1);
+            this.OmapGroupBox.Name = "OmapGroupBox";
+            this.OmapGroupBox.Padding = new System.Windows.Forms.Padding(1);
+            this.OmapGroupBox.Size = new System.Drawing.Size(236, 169);
+            this.OmapGroupBox.TabIndex = 12;
+            this.OmapGroupBox.TabStop = false;
+            this.OmapGroupBox.Text = "Omap Info";
+            // 
+            // OmapTypeComboBox
+            // 
+            this.OmapTypeComboBox.FormattingEnabled = true;
+            this.OmapTypeComboBox.Location = new System.Drawing.Point(65, 115);
+            this.OmapTypeComboBox.Name = "OmapTypeComboBox";
+            this.OmapTypeComboBox.Size = new System.Drawing.Size(130, 20);
+            this.OmapTypeComboBox.TabIndex = 6;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(22, 118);
+            this.label7.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(38, 12);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "Type";
+            // 
+            // OmapIpText
+            // 
+            this.OmapIpText.Location = new System.Drawing.Point(62, 71);
+            this.OmapIpText.Margin = new System.Windows.Forms.Padding(1);
+            this.OmapIpText.Name = "OmapIpText";
+            this.OmapIpText.Size = new System.Drawing.Size(133, 21);
+            this.OmapIpText.TabIndex = 2;
+            this.OmapIpText.Text = "192.168.0.10";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(27, 72);
+            this.label9.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(33, 12);
+            this.label9.TabIndex = 1;
+            this.label9.Text = "I P :";
+            // 
+            // OmapActiveCheck
+            // 
+            this.OmapActiveCheck.AutoSize = true;
+            this.OmapActiveCheck.Location = new System.Drawing.Point(26, 32);
+            this.OmapActiveCheck.Margin = new System.Windows.Forms.Padding(1);
+            this.OmapActiveCheck.Name = "OmapActiveCheck";
+            this.OmapActiveCheck.Size = new System.Drawing.Size(69, 16);
+            this.OmapActiveCheck.TabIndex = 0;
+            this.OmapActiveCheck.Text = " Active";
+            this.OmapActiveCheck.UseVisualStyleBackColor = true;
+            // 
             // SensorAddForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(325, 348);
+            this.ClientSize = new System.Drawing.Size(316, 348);
+            this.Controls.Add(this.OmapGroupBox);
             this.Controls.Add(this.ModbusGroupBox);
             this.Controls.Add(this.MemoyUsageGroup);
             this.Controls.Add(this.SaveBtn);
@@ -428,6 +501,8 @@
             this.ModbusGroupBox.PerformLayout();
             this.MemoyUsageGroup.ResumeLayout(false);
             this.MemoyUsageGroup.PerformLayout();
+            this.OmapGroupBox.ResumeLayout(false);
+            this.OmapGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -463,5 +538,11 @@
         private System.Windows.Forms.CheckBox ModbusActiveCheck;
         private System.Windows.Forms.GroupBox MemoyUsageGroup;
         private System.Windows.Forms.CheckBox MemoryActiveCheck;
+        private System.Windows.Forms.GroupBox OmapGroupBox;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox OmapIpText;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.CheckBox OmapActiveCheck;
+        private System.Windows.Forms.ComboBox OmapTypeComboBox;
     }
 }
