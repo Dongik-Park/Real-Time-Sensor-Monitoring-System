@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="SensorData">
+  <DataContextMoniker Name="/SensorDataContext" />
+  <nestedChildShapes>
+    <classShape Id="d0ef136f-8535-4c42-aeec-3f5f51085659" absoluteBounds="0.5, 2.875, 2, 1.5785953776041666">
+      <DataClassMoniker Name="/SensorDataContext/SensorData" />
+      <nestedChildShapes>
+        <elementListCompartment Id="75cdfe23-8b7b-442a-8a21-57cbdd8190f7" absoluteBounds="0.51500000000000012, 3.335, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="3e345f79-5f8d-4249-8e24-0f1d31628c64" absoluteBounds="3.5, 2.875, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/SensorDataContext/BaseSensorConfig" />
+      <nestedChildShapes>
+        <elementListCompartment Id="3a78d47b-6a81-4c81-8483-d92fd23b6508" absoluteBounds="3.5149999999999997, 3.335, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="a2c1abb0-9aa0-4ac0-999f-1c7884085315" absoluteBounds="3.5, 0.5, 2, 1.0016910807291668">
+      <DataClassMoniker Name="/SensorDataContext/TempertaureSensorConfig" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b39a197c-e401-42ac-ab12-27acc74d4788" absoluteBounds="3.5149999999999997, 0.96, 1.9700000000000002, 0.44169108072916663" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="7c66e910-cd14-4783-bc85-7847f66fe99c" absoluteBounds="6.5, 0.625, 2, 1.0016910807291666">
+      <DataClassMoniker Name="/SensorDataContext/CpuSensorConfig" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5fbabb6c-0ec5-41e0-a189-b7bf5dff26b1" absoluteBounds="6.515, 1.085, 1.9700000000000002, 0.44169108072916663" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="f9aa5b87-dd7e-4cbf-898c-86c591789a51" absoluteBounds="6.5, 2.875, 2, 0.80938964843749961">
+      <DataClassMoniker Name="/SensorDataContext/MemorySensorConfig" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b840b39c-ebb2-4cd8-8377-8affc1b668e0" absoluteBounds="6.515, 3.335, 1.9700000000000002, 0.2493896484375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="15f07c6d-233d-45d9-b620-74d16f3512a7" absoluteBounds="6.5, 3.875, 2, 1.3862939453124996">
+      <DataClassMoniker Name="/SensorDataContext/ModbusSensorConfig" />
+      <nestedChildShapes>
+        <elementListCompartment Id="492cc98a-a60e-4ee0-a2ed-a856191bb69d" absoluteBounds="6.5150000000000006, 4.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <inheritanceConnector edgePoints="[(4.5 : 2.875); (4.5 : 1.50169108072917)]" fixedFrom="NotFixed" fixedTo="NotFixed" TargetRelationshipDomainClassId="7a7fe09e-e9ef-4b01-9ff3-bde95e827b62">
+      <nodes>
+        <classShapeMoniker Id="3e345f79-5f8d-4249-8e24-0f1d31628c64" />
+        <classShapeMoniker Id="a2c1abb0-9aa0-4ac0-999f-1c7884085315" />
+      </nodes>
+    </inheritanceConnector>
+    <inheritanceConnector edgePoints="[(5.5 : 4.26044840494792); (6.5 : 4.26044840494792)]" fixedFrom="Algorithm" fixedTo="Algorithm" TargetRelationshipDomainClassId="7a7fe09e-e9ef-4b01-9ff3-bde95e827b62">
+      <nodes>
+        <classShapeMoniker Id="3e345f79-5f8d-4249-8e24-0f1d31628c64" />
+        <classShapeMoniker Id="15f07c6d-233d-45d9-b620-74d16f3512a7" />
+      </nodes>
+    </inheritanceConnector>
+    <inheritanceConnector edgePoints="[(4.5 : 2.875); (4.5 : 2.00169108072917); (7.5 : 2.00169108072917); (7.5 : 1.62669108072917)]" fixedFrom="NotFixed" fixedTo="NotFixed" TargetRelationshipDomainClassId="7a7fe09e-e9ef-4b01-9ff3-bde95e827b62">
+      <nodes>
+        <classShapeMoniker Id="3e345f79-5f8d-4249-8e24-0f1d31628c64" />
+        <classShapeMoniker Id="7c66e910-cd14-4783-bc85-7847f66fe99c" />
+      </nodes>
+    </inheritanceConnector>
+    <inheritanceConnector edgePoints="[(5.5 : 3.27969482421875); (6.5 : 3.27969482421875)]" fixedFrom="Algorithm" fixedTo="Algorithm" TargetRelationshipDomainClassId="7a7fe09e-e9ef-4b01-9ff3-bde95e827b62">
+      <nodes>
+        <classShapeMoniker Id="3e345f79-5f8d-4249-8e24-0f1d31628c64" />
+        <classShapeMoniker Id="f9aa5b87-dd7e-4cbf-898c-86c591789a51" />
+      </nodes>
+    </inheritanceConnector>
+    <classShape Id="8df14f67-bd73-4d50-9645-d0034b34ded6" absoluteBounds="3.5, 5.125, 2, 1.1939925130208327">
+      <DataClassMoniker Name="/SensorDataContext/OmapSensorConfig" />
+      <nestedChildShapes>
+        <elementListCompartment Id="00e77fe5-901d-49fa-9bd9-ec840f20a617" absoluteBounds="3.515, 5.585, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <inheritanceConnector edgePoints="[(4.5 : 4.64589680989583); (4.5 : 5.125)]" fixedFrom="NotFixed" fixedTo="NotFixed" TargetRelationshipDomainClassId="7a7fe09e-e9ef-4b01-9ff3-bde95e827b62">
+      <nodes>
+        <classShapeMoniker Id="3e345f79-5f8d-4249-8e24-0f1d31628c64" />
+        <classShapeMoniker Id="8df14f67-bd73-4d50-9645-d0034b34ded6" />
+      </nodes>
+    </inheritanceConnector>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Class="SensorDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Table Name="" Member="SensorDatas">
+    <Type Name="SensorData">
+      <Column Name="Id" Type="System.UInt64" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Time" Type="System.DateTime" CanBeNull="false" />
+      <Column Name="Data" Type="System.Double" DbType="Float" CanBeNull="false" />
+      <Column Name="SensorConfigId" Type="System.Int32" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="" Member="BaseSensorConfigs">
+    <Type Name="BaseSensorConfig" InheritanceCode="0" IsInheritanceDefault="true">
+      <Column Name="Id" Type="System.Int32" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" CanBeNull="false" />
+      <Column Name="SensorType" Type="global::WindowForm_Dongik.SensorType" DbType="tinyint default 0" CanBeNull="false" IsDiscriminator="true" />
+      <Column Name="MadeTime" Type="System.DateTime" CanBeNull="false" />
+      <Column Name="IsActive" Type="System.Boolean" CanBeNull="false" />
+      <Type Name="TempertaureSensorConfig" InheritanceCode="1">
+        <Column Name="CoreIndex" Storage="_Core1" Type="CoreNumber" DbType="tinyint default 0" CanBeNull="false" />
+      </Type>
+      <Type Name="ModbusSensorConfig" InheritanceCode="4">
+        <Column Name="Ip" Type="System.String" DbType="NVARCHAR(4000) default '127.0.0.1'" CanBeNull="false" />
+        <Column Name="Port" Type="System.Int32" DbType="int default 0" CanBeNull="false" />
+        <Column Name="Address" Type="System.UInt16" DbType="smallint default 0" CanBeNull="false" />
+      </Type>
+      <Type Name="CpuSensorConfig" InheritanceCode="2">
+        <Column Name="Process" Member="ProcessType" Storage="_Process" Type="ProcessType" DbType="tinyint default 0" CanBeNull="false" />
+      </Type>
+      <Type Name="MemorySensorConfig" InheritanceCode="3" />
+      <Type Name="OmapSensorConfig" InheritanceCode="5">
+        <Column Name="OmapType" Type="OmapType" DbType="tinyint default 0" CanBeNull="false" />
+        <Column Name="OmapIp" Member="Ip" Type="System.String" DbType="NVARCHAR(4000) default '127.0.0.1'" CanBeNull="false" />
+      </Type>
+    </Type>
+  </Table>
+</Database>
