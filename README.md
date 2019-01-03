@@ -1,6 +1,6 @@
 # Real-Time-Sensor-Monitoring-System
 
-###This project is based on C#, Winforms, MS-SQL.
+### This project is based on C#, Winforms, MS-SQL.
 
 **It has three basic functions.**
 > 1. Real-time PC(Core Temperatrue, CPU occupied, Memory Usage), Modbus, Vibration sensor monitoring. 
